@@ -17,6 +17,8 @@ const OTP_TEST_CODE = '123456'; // In production, replace with Twilio / WhatsApp
 
 app.use(cors());
 app.use(express.json());
+app.use(express.static(__dirname));
+app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 
 // ===== DATA STORAGE - JSON FILES (No DB needed) =====
 const DATA_DIR = path.join(__dirname, 'data');
