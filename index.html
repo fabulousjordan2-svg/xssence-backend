@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>XSSENCE LIBERIA — The Drop Is Here</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,Helvetica,sans-serif}
+body{background:#fff;color:#111;font-size:13px}
+a{color:#111;text-decoration:none}
+.topbar{background:#000;color:#fff;text-align:center;font-size:10px;padding:8px}
+.topbar span{color:#ffcc00}
+header{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid #eee;position:sticky;top:0;background:#fff;z-index:20;flex-wrap:wrap;gap:6px}
+header .nav{display:flex;gap:14px;font-size:11px;font-weight:700;text-transform:uppercase}
+.logo{font-weight:900;font-size:20px;line-height:1;text-align:center;cursor:pointer}
+.logo span{font-size:8px;letter-spacing:4px;display:block}
+.header-right{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.cart-btn{background:#111;color:#fff;padding:8px 12px;border-radius:50px;font-weight:800;border:none;cursor:pointer;font-size:11px}
+.wa-top{background:#25D366;color:#fff;padding:8px 12px;border-radius:50px;font-weight:800;font-size:11px}
+.wish-btn{background:#fff;color:#111;border:1.5px solid #111;padding:8px 12px;border-radius:50px;font-weight:800;font-size:11px;cursor:pointer}
+.auth-btn{background:#ffcc00;color:#111;padding:8px 12px;border-radius:50px;font-weight:800;font-size:11px;cursor:pointer;border:none}
+.hero{background:#000;color:#fff;display:flex;justify-content:space-between;align-items:center;padding:28px 16px;gap:16px;flex-wrap:wrap}
+.hero h1{font-size:44px;font-weight:900;line-height:.9}
+.hero p{font-size:13px;letter-spacing:2px;margin:10px 0 14px}
+.hero .btn{display:inline-block;background:#fff;color:#000;padding:10px 18px;font-weight:800;border-radius:50px;font-size:11px;text-transform:uppercase}
+.hero-imgs{display:flex;gap:10px;flex-wrap:wrap}
+.hero-imgs a{background:#111;border:1px solid #333;width:120px;height:160px;display:block;border-radius:8px;overflow:hidden;position:relative}
+.hero-imgs a img{width:100%;height:100%;object-fit:contain;background:#fff}
+.hero-imgs a span{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.7);color:#fff;font-size:10px;padding:6px;text-align:center}
+.search-box{padding:14px 16px 0;max-width:1250px;margin:0 auto;display:flex;gap:8px}
+.search-box input{flex:1;padding:10px 14px;border:1.5px solid #111;border-radius:50px;font-size:12px}
+.search-box button{background:#111;color:#fff;border:none;padding:0 16px;border-radius:50px;font-weight:800;cursor:pointer;font-size:11px}
+.cats{display:flex;gap:6px;overflow-x:auto;padding:12px 16px 4px;max-width:1250px;margin:0 auto}
+.cats button{white-space:nowrap;padding:7px 12px;border-radius:50px;border:1.5px solid #ddd;background:#fff;font-weight:700;cursor:pointer;font-size:11px}
+.cats button.active{background:#111;color:#fff}
+.filters{display:flex;gap:6px;flex-wrap:wrap;padding:6px 16px 0;max-width:1250px;margin:0 auto}
+.filters select{padding:8px 10px;border-radius:50px;border:1px solid #ddd;font-weight:700;font-size:11px}
+.filters button{padding:8px 12px;border-radius:50px;border:1px solid #ddd;background:#fff;font-weight:700;cursor:pointer;font-size:11px}
+.section{padding:26px 16px;max-width:1250px;margin:0 auto}
+.section h2{text-align:center;letter-spacing:1px;margin-bottom:6px;font-size:17px}
+.section .sub{text-align:center;color:#888;font-size:11px;margin-bottom:16px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.card{border:1px solid #eee;border-radius:10px;overflow:hidden;text-align:center;padding-bottom:12px;background:#fff;position:relative}
+.card .img{height:230px;background:#f5f5f5;overflow:hidden;cursor:pointer}
+.card .img img{width:100%;height:100%;object-fit:contain}
+.card h3{margin:8px 6px 3px;text-transform:uppercase;font-size:12px}
+.card .cat{font-size:10px;color:#888;text-transform:uppercase}
+.card .price{font-weight:900;font-size:15px}.card .price s{color:#999;font-size:11px}
+.card .stars{color:#FFB800;font-size:10px;margin:3px 0}
+.view-btn,.add-btn{display:block;margin:7px 10px 0;padding:9px;border-radius:50px;font-weight:800;cursor:pointer;text-align:center;font-size:11px}
+.view-btn{background:#fff;border:1.5px solid #111}
+.add-btn{background:#111;color:#fff;border:none;width:calc(100% - 20px)}
+.heart-btn{position:absolute;top:8px;right:8px;width:32px;height:32px;border-radius:50%;border:none;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.2);cursor:pointer;font-size:16px;z-index:2}
+.heart-btn.active{background:#111;color:#fff}
+.crumb{padding:10px 16px;font-size:11px;color:#888;max-width:1250px;margin:0 auto}
+.crumb b{color:#111}
+.product{display:flex;gap:24px;padding:20px 16px 26px;max-width:1250px;margin:0 auto;border-top:1px solid #eee}
+.left{flex:1.1}
+.main-img{background:#f5f5f5;height:420px;border-radius:8px;overflow:hidden;position:relative}
+.main-img img{width:100%;height:100%;object-fit:contain;display:block}
+.zoom-hint{position:absolute;bottom:10px;background:rgba(0,0,0,.7);color:#fff;font-size:10px;padding:5px 8px;border-radius:20px}
+.arrow-btn{position:absolute;top:50%;transform:translateY(-50%);width:32px;height:32px;border:none;border-radius:50%;background:rgba(255,255,255,.9);font-weight:900;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.2);z-index:2}
+.dots{display:flex;justify-content:center;gap:6px;margin-top:8px}
+.dots span{width:8px;height:8px;border-radius:50%;background:#ddd;cursor:pointer;display:inline-block}
+.dots span.active{background:#111}
+.thumbs{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+.thumbs div{text-align:center;cursor:pointer}
+.thumbs div img{width:60px;height:60px;object-fit:cover;border-radius:6px;display:block;border:2px solid transparent}
+.thumbs div.active img{border-color:#111}
+.thumbs div span{font-size:9px}
+.right{flex:1}
+.badge{background:#111;color:#fff;font-size:10px;padding:3px 7px;border-radius:20px;display:inline-block}
+.right h1{font-size:21px;margin:8px 0 4px;font-weight:900}
+.sku{font-size:11px;color:#888}
+.stars{color:#FFB800;font-size:12px}.stars span{color:#111;font-size:11px;font-weight:700}
+.price{font-size:20px;font-weight:900;margin:8px 0}.price s{font-size:13px;color:#999}
+.urgency{margin:8px 0;font-size:11px}.urgency b{color:#D32F2F}
+.trust{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
+.trust div{font-size:11px;font-weight:600;background:#f9f9f9;padding:8px;border-radius:8px}
+.qty-label{font-size:11px;font-weight:700;margin:10px 0 6px}
+.qty{display:inline-flex;border:1px solid #ddd;border-radius:30px;overflow:hidden}
+.qty button{width:32px;height:32px;border:none;background:#fff;font-size:15px;cursor:pointer}
+.qty input{width:34px;text-align:center;border:none;font-weight:700}
+.size{margin-left:8px;padding:8px 10px;border:1px solid #ddd;border-radius:30px;font-weight:700;font-size:11px}
+.bundle-title{font-size:13px;font-weight:900;margin:14px 0 3px}
+.bundles{display:flex;gap:8px}
+.bundle{flex:1;border:1px solid #ddd;border-radius:10px;padding:10px;text-align:center;cursor:pointer;position:relative}
+.bundle.selected{border:2px solid #111}
+.bundle .tag{position:absolute;top:-8px;left:50%;transform:translateX(-50%);background:#111;color:#fff;font-size:9px;padding:2px 6px;border-radius:20px;white-space:nowrap}
+.bundle .tag.popular{background:#D32F2F}
+.bundle h4{font-size:11px;margin:5px 0 2px}.bundle p{font-size:10px;color:#666}
+.bundle .bprice{font-size:14px;font-weight:900;margin-top:5px}.bundle .bprice s{font-size:10px;color:#999;display:block}
+.bundle .save{font-size:10px;background:#E8F5E9;color:#2E7D32;padding:2px 5px;border-radius:10px;display:inline-block;margin-top:3px}
+.btn-stack{margin-top:12px}
+.btn-stack button{display:block;width:100%;padding:12px;border-radius:30px;font-weight:800;cursor:pointer;font-size:12px;text-align:center;margin-top:8px;border:none}
+.add-cart{background:#fff!important;color:#111;border:1.5px solid #111!important}
+.buy-shop{background:#111;color:#fff}
+.wish-big{background:#fff!important;color:#111;border:1.5px solid #111!important}
+.delivery{border:1px solid #eee;border-radius:10px;padding:10px;font-size:11px;line-height:1.5;margin-top:10px}.delivery b{color:#2E7D32}
+.pair-box{border:1px solid #eee;border-radius:10px;padding:10px;margin-top:12px}
+.pair-box h4{font-size:12px;margin-bottom:6px}
+.pair-item{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid #f0f0f0;font-size:11px}
+.pair-item button{background:#111;color:#fff;border:none;padding:6px 10px;border-radius:50px;font-weight:700;cursor:pointer;font-size:11px}
+.acc{border-top:1px solid #eee;margin-top:12px}.acc details{border-bottom:1px solid #eee;padding:10px 0}
+.acc summary{font-weight:800;cursor:pointer;display:flex;justify-content:space-between;font-size:12px}.acc summary::after{content:"+";font-size:15px}
+.acc p,.acc ul{font-size:12px;line-height:1.6;color:#444;margin-top:6px}.acc ul{margin-left:16px}
+.compare{max-width:1250px;margin:0 auto;padding:0 16px 26px}
+.compare h2{font-size:15px;margin-bottom:10px}
+.compare table{width:100%;border-collapse:collapse;font-size:12px}.compare th,.compare td{border:1px solid #eee;padding:8px;text-align:center}
+.compare th:first-child,.compare td:first-child{text-align:left}.compare th{background:#111;color:#fff}
+.compare td.tick{color:#2E7D32;font-weight:800}.compare td.cross{color:#D32F2F}
+.brand{background:#000;color:#fff;padding:28px 16px;text-align:center}
+.brand h2{font-size:22px}.brand p{max-width:650px;margin:8px auto 0;line-height:1.6;color:#ccc;font-size:12px}
+.brand-grid{display:flex;gap:12px;max-width:1000px;margin:16px auto 0;flex-wrap:wrap;justify-content:center}
+.brand-grid div{background:#111;padding:12px;border-radius:10px;flex:1;min-width:180px}.brand-grid b{font-size:12px}.brand-grid span{font-size:11px;color:#aaa}
+#cartDrawer,#wishDrawer,#authModal,#accountDrawer{position:fixed;right:-360px;top:0;width:340px;max-width:92vw;height:100%;background:#fff;padding:16px;transition:.3s;z-index:40;overflow:auto;box-shadow:-5px 0 20px rgba(0,0,0,.15)}
+#cartDrawer.open,#wishDrawer.open,#authModal.open,#accountDrawer.open{right:0}
+#cartDrawer h3,#wishDrawer h3,#authModal h3,#accountDrawer h3{margin-bottom:10px;font-size:15px}
+#cartItems,#wishItems{list-style:none}
+#cartItems li,#wishItems li{padding:10px 0;border-bottom:1px solid #eee;font-size:11px}
+.cart-row{display:flex;justify-content:space-between;gap:8px}
+.cart-qty{display:inline-flex;align-items:center;gap:6px;margin-top:6px;border:1px solid #ddd;border-radius:20px;padding:2px 6px}
+.cart-qty button{width:22px;height:22px;border:none;background:#111;color:#fff;border-radius:50%;font-weight:800;cursor:pointer}
+.cart-qty span{font-weight:800;min-width:16px;text-align:center}
+.remove-btn{border:none;background:none;cursor:pointer;color:#D32F2F;font-size:11px;font-weight:700}
+.cart-total{font-weight:900;font-size:15px;margin-top:12px;display:flex;justify-content:space-between}
+.checkout-form input,.checkout-form select,.auth-form input,.auth-form select{width:100%;padding:10px;border:1px solid #ddd;border-radius:10px;margin-bottom:8px;font-size:12px}
+.pay-box{background:#FFF8E1;border:1px solid #FFCC00;border-radius:10px;padding:10px;font-size:11px;line-height:1.6;margin:10px 0}
+#checkoutBtn{background:#111;color:#fff;border:none;width:100%;padding:12px;border-radius:50px;font-weight:800;margin-top:8px;cursor:pointer;font-size:12px}
+#checkoutBtn:disabled{background:#999;cursor:not-allowed}
+.checkout-wa{background:#25D366;color:#fff;border:none;width:100%;padding:12px;border-radius:50px;font-weight:800;margin-top:8px;cursor:pointer;font-size:12px}
+.checkout-wa:disabled{background:#aaa;cursor:not-allowed}
+.close-cart{float:right;border:none;background:none;font-size:16px;cursor:pointer}
+.otp-box{background:#f9f9f9;border:1px solid #ddd;border-radius:10px;padding:10px;margin:8px 0}
+.otp-box input{width:100%;padding:10px;border:1px solid #ddd;border-radius:10px;margin-bottom:8px;font-size:12px}
+.auth-tabs{display:flex;gap:8px;margin-bottom:12px}
+.auth-tabs button{flex:1;padding:10px;border-radius:50px;border:1.5px solid #111;background:#fff;font-weight:800;cursor:pointer;font-size:12px}
+.auth-tabs button.active{background:#111;color:#fff}
+footer{text-align:center;padding:16px;font-size:11px;color:#888}
+.photo-gallery{border-top:1px solid #eee}
+.photo-gallery-controls{display:flex;justify-content:center;gap:6px;overflow-x:auto;padding:2px 0 14px}
+.photo-gallery-controls button{white-space:nowrap;padding:7px 12px;border-radius:50px;border:1px solid #ddd;background:#fff;font-weight:700;cursor:pointer;font-size:11px}
+.photo-gallery-controls button.active{background:#111;color:#fff}
+.photo-gallery-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.photo-gallery figure{border:1px solid #eee;border-radius:10px;overflow:hidden;background:#fff}
+.photo-gallery figure img{display:block;width:100%;height:240px;object-fit:contain;background:#f7f7f7}
+.photo-gallery figcaption{padding:9px;font-size:11px;font-weight:700;line-height:1.4}
+@media(max-width:850px){.product{flex-direction:column;padding:0 14px 20px}header .nav{display:none}.main-img{height:320px}.bundles{flex-direction:column}.hero h1{font-size:34px}.grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:700px){.photo-gallery-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.photo-gallery figure img{height:210px}}
+@media(max-width:480px){.grid{grid-template-columns:1fr}.photo-gallery-grid{gap:8px}.photo-gallery figure img{height:180px}}
+</style>
+</head>
+<body>
+<div class="topbar">MONROVIA, LIBERIA • <span>ORANGE MONEY ACCEPTED • DELIVERY MONROVIA $3-$5 / OUTSIDE $15-$30</span></div>
+<header>
+<div class="nav"><a href="#home">Home</a><a href="#shop">Shop</a><a href="#hoodie">Hoodies</a><a href="#tee">Tees</a><a href="#joggers">Joggers</a><a href="#photo-gallery">Photos</a></div>
+<div class="logo" onclick="window.scrollTo({top:0,behavior:'smooth'})">X<span>SSENCE</span></div>
+<div class="header-right">
+<span id="userGreeting" style="font-size:11px;font-weight:800;display:none"></span>
+<button class="auth-btn" id="authBtn" onclick="toggleAuth()">👤 Login / Signup</button>
+<button class="auth-btn" id="accountBtn" onclick="toggleAccount()" style="display:none;background:#111;color:#fff">👤 My Account</button>
+<button class="auth-btn" id="logoutBtn" onclick="logoutUser()" style="display:none;background:#fff;border:1.5px solid #D32F2F;color:#D32F2F">Logout</button>
+<button class="wish-btn" onclick="toggleWishDrawer()">❤️ Wishlist (<span id="wishCount">0</span>)</button>
+<a class="wa-top" href="https://wa.me/231778566814?text=Hi%20XSSENCE%20I%20want%20to%20order" target="_blank">💬 WhatsApp</a>
+<button class="cart-btn" onclick="toggleCart()">🛒 Cart (<span id="cartCount">0</span>)</button>
+</div>
+</header>
+<div class="hero" id="home"><div><h1>XSSENCE</h1><p>THE DROP IS HERE — LIBERIA</p><div id="heroAuthMsg" style="font-size:12px;margin-bottom:10px;color:#ffcc00">Login to save your wishlist & checkout faster →</div><a href="#shop" class="btn">Shop Now</a> <a href="#shop" onclick="showWishlistOnly()" class="btn" style="background:#ffcc00;color:#111;margin-left:6px">❤️ My Wishlist</a></div><div class="hero-imgs"><a href="#hoodie"><img src="assets/photos/IMG-20261114-WA3069.jpg" alt="Black XSSENCE hoodie"><span>HOODIE • $35</span></a><a href="#dodgers"><img src="assets/photos/IMG-20261115-WA9250.jpg" alt="Dodgers baseball jersey"><span>DODGERS • $35</span></a><a href="#graffiti"><img src="assets/photos/IMG-20261115-WA1956.jpg" alt="Brown graffiti crewneck"><span>GRAFFITI • $35</span></a></div></div>
+<div class="search-box"><input id="searchInput" placeholder="🔍 Search — try 'dodgers', 'graffiti', 'adidas', 'polo', 'hoodie'..." oninput="filterProducts()"><button onclick="filterProducts()">Search</button></div>
+<div class="cats" id="catBar"><button class="active" onclick="setCat('all',this)">All</button><button onclick="setCat('hoodie',this)">Hoodies</button><button onclick="setCat('tee',this)">Tees</button><button onclick="setCat('long-sleeve',this)">Long Sleeve</button><button onclick="setCat('joggers',this)">Joggers</button><button onclick="setCat('underwear',this)">Underwear</button><button onclick="setCat('shorts',this)">Shorts</button><button onclick="setCat('cap',this)">Caps</button><button onclick="setCat('set',this)">Sets / Pairs 🔥</button><button onclick="showWishlistOnly()" style="background:#111;color:#fff">❤️ Wishlist Only</button></div>
+<div class="filters"><select id="colorFilter" onchange="filterProducts()"><option value="">All Colours</option><option>Black</option><option>White</option><option>Grey</option><option>Olive</option><option>Mocha</option><option>Navy</option><option>Blue</option><option>Brown</option></select><select id="priceFilter" onchange="filterProducts()"><option value="">All Prices</option><option value="0-20">Under $20</option><option value="20-40">$20 - $40</option><option value="40-100">$40+</option></select><select id="sizeFilter" onchange="filterProducts()"><option value="">All Sizes</option><option>S</option><option>M</option><option>L</option><option>XL</option><option>XXL</option></select><button onclick="clearFilters()">Clear ✕</button></div>
+<div class="section" id="shop"><h2>NEW COLLECTION — SHOP NOW</h2><div class="sub">Tap ❤️ to save to Wishlist • Login to keep wishlist forever • <span id="resultCount"></span></div><div class="grid" id="productGrid"></div><div id="noResult" style="display:none;text-align:center;padding:20px;color:#888;font-size:12px">No items found.<br><br><button onclick="clearFilters()" style="background:#111;color:#fff;border:none;padding:10px 16px;border-radius:50px;font-weight:800;cursor:pointer">Show All</button></div></div>
+
+<!-- PRODUCT DETAIL SECTIONS -->
+<div class="crumb" id="hoodie">Home / Hoodies / <b>XSSENCE Oversized Hoodie - Black</b></div>
+<div class="product"><div class="left"><div style="position:relative"><div class="main-img" id="sliderHoodie"><img id="imgHoodie" src="assets/photos/IMG-20261114-WA3069.jpg"><div class="zoom-hint" id="hoodieLabel" style="left:10px">1 / 5 — Front</div><div class="zoom-hint" style="right:10px">Swipe ◀ ▶</div></div><button class="arrow-btn" style="left:8px" onclick="slideProduct('hoodie',-1)">‹</button><button class="arrow-btn" style="right:8px" onclick="slideProduct('hoodie',1)">›</button></div><div class="dots" id="dotsHoodie"><span class="active" onclick="goSlide('hoodie',0)"></span><span onclick="goSlide('hoodie',1)"></span><span onclick="goSlide('hoodie',2)"></span><span onclick="goSlide('hoodie',3)"></span><span onclick="goSlide('hoodie',4)"></span></div><div class="thumbs" id="thumbsHoodie"><div class="active" onclick="goSlide('hoodie',0)"><img src="assets/photos/IMG-20261114-WA3069.jpg"><span>Front</span></div><div onclick="goSlide('hoodie',1)"><img src="assets/photos/IMG-20261115-WA2671.jpg"><span>Back</span></div><div onclick="goSlide('hoodie',2)"><img src="assets/photos/IMG-20261115-WA5553.jpg"><span>Neck</span></div><div onclick="goSlide('hoodie',3)"><img src="assets/photos/IMG-20261115-WA8590.jpg"><span>Sleeve</span></div><div onclick="goSlide('hoodie',4)"><img src="assets/photos/IMG-20261114-WA3069.jpg"><span>Logo</span></div></div></div>
+<div class="right"><span class="badge">Best Seller</span><h1>XSSENCE Oversized Hoodie - Black</h1><div class="sku">SKU: XSS-HD-001-BLK</div><div class="stars">★★★★★ <span>4.9 | 312 Reviews</span></div><div class="price">$35 <s>$40</s></div><div class="trust"><div>🧵 400 GSM Cotton</div><div>✨ No Fade / No Shrink</div><div>♻️ Skin Friendly</div><div>💎 Designer Choice</div></div><div class="bundle-title">Bundle & Save</div><div class="bundles"><div class="bundle" onclick="selectBundle(this,'cartPrice1')"><h4>Pack of 1</h4><p>Single Hoodie</p><div class="bprice">$35<s>$40</s></div></div><div class="bundle selected" onclick="selectBundle(this,'cartPrice1')"><div class="tag popular">Most Popular</div><h4>Pack of 2</h4><p>Hoodie + Tee</p><div class="bprice">$55<s>$60</s></div></div><div class="bundle" onclick="selectBundle(this,'cartPrice1')"><div class="tag">High Value</div><h4>Pack of 3</h4><p>Full Set</p><div class="bprice">$75<s>$85</s></div></div></div><div class="btn-stack"><button class="add-cart" onclick="addBundleToCart('XSSENCE Hoodie Bundle','cartPrice1')">ADD TO CART — <span id="cartPrice1">$55</span></button><button class="buy-shop" onclick="addBundleToCart('XSSENCE Hoodie Bundle','cartPrice1');toggleCart(true)">BUY NOW — $55</button><button class="wish-big" onclick="toggleWishlist(1,this)">♡ ADD TO WISHLIST</button></div><div class="delivery">🚚 <b>Delivery — Monrovia $3-$5 • Outside $15-$30</b><br>Full Set in Monrovia: <b>FREE Delivery</b></div></div></div>
+
+<div class="crumb" id="dodgers">Home / Jerseys / <b>Dodgers Freeman #5 Baseball Jersey — White / Gold</b></div>
+<div class="product"><div class="left"><div style="position:relative"><div class="main-img" id="sliderDodgers"><img id="imgDodgers" src="assets/photos/IMG-20261115-WA9250.jpg"><div class="zoom-hint" id="dodgersLabel" style="left:10px">1 / 4 — Front</div><div class="zoom-hint" style="right:10px">Swipe ◀ ▶</div></div><button class="arrow-btn" style="left:8px" onclick="slideProduct('dodgers',-1)">‹</button><button class="arrow-btn" style="right:8px" onclick="slideProduct('dodgers',1)">›</button></div><div class="dots" id="dotsDodgers"><span class="active" onclick="goSlide('dodgers',0)"></span><span onclick="goSlide('dodgers',1)"></span><span onclick="goSlide('dodgers',2)"></span><span onclick="goSlide('dodgers',3)"></span></div><div class="thumbs" id="thumbsDodgers"><div class="active" onclick="goSlide('dodgers',0)"><img src="assets/photos/IMG-20261115-WA9250.jpg"><span>Front</span></div><div onclick="goSlide('dodgers',1)"><img src="assets/photos/IMG-20261115-WA0045.jpg"><span>Back</span></div><div onclick="goSlide('dodgers',2)"><img src="assets/photos/IMG-20261115-WA9250.jpg"><span>Detail</span></div><div onclick="goSlide('dodgers',3)"><img src="assets/photos/IMG-20261115-WA0045.jpg"><span>Logo</span></div></div></div>
+<div class="right"><span class="badge">NEW • HOT 🔥</span><h1>Dodgers Freeman #5 Baseball Jersey — White / Gold</h1><div class="sku">SKU: XSS-DOD-005</div><div class="stars">★★★★★ <span>5.0 | New Drop</span></div><div class="price">$35 <s>$45</s></div><p style="font-size:12px;line-height:1.6;color:#444;margin:8px 0">Classic button-up baseball jersey. White with gold Dodgers script, blue outline, #5 on front. Nike swoosh, World Series patch on sleeve. Back: FREEMAN 5 in large gold.</p><div class="btn-stack"><button class="add-cart" onclick="addToCart('Dodgers Freeman #5 Jersey - $35',35)">ADD TO CART — $35</button><button class="buy-shop" onclick="addToCart('Dodgers Freeman #5 Jersey - $35',35);toggleCart(true)">BUY NOW — $35</button><button class="wish-big" onclick="toggleWishlist(9,this)">♡ ADD TO WISHLIST</button></div><div class="delivery">🚚 <b>Delivery — Monrovia $3-$5 • Outside $15-$30</b></div></div></div>
+
+<div class="crumb" id="graffiti">Home / Sweatshirts / <b>Brown Graffiti Oversized Crewneck</b></div>
+<div class="product"><div class="left"><div style="position:relative"><div class="main-img" id="sliderGraffiti"><img id="imgGraffiti" src="assets/photos/IMG-20261115-WA1956.jpg"><div class="zoom-hint" id="graffitiLabel" style="left:10px">1 / 4 — Front</div><div class="zoom-hint" style="right:10px">Swipe ◀ ▶</div></div><button class="arrow-btn" style="left:8px" onclick="slideProduct('graffiti',-1)">‹</button><button class="arrow-btn" style="right:8px" onclick="slideProduct('graffiti',1)">›</button></div><div class="dots" id="dotsGraffiti"><span class="active" onclick="goSlide('graffiti',0)"></span><span onclick="goSlide('graffiti',1)"></span><span onclick="goSlide('graffiti',2)"></span><span onclick="goSlide('graffiti',3)"></span></div><div class="thumbs" id="thumbsGraffiti"><div class="active" onclick="goSlide('graffiti',0)"><img src="assets/photos/IMG-20261115-WA1956.jpg"><span>Front</span></div><div onclick="goSlide('graffiti',1)"><img src="assets/photos/IMG-20261115-WA6008.jpg"><span>Back</span></div><div onclick="goSlide('graffiti',2)"><img src="assets/photos/IMG-20261115-WA0477.jpg"><span>Neck</span></div><div onclick="goSlide('graffiti',3)"><img src="assets/photos/IMG-20261115-WA8593.jpg"><span>Sleeve</span></div></div></div>
+<div class="right"><span class="badge">NEW • STREET</span><h1>Brown Graffiti Oversized Crewneck — White Scribble Print</h1><div class="sku">SKU: XSS-GRF-BRN</div><div class="stars">★★★★★ <span>5.0 | New Drop</span></div><div class="price">$35 <s>$45</s></div><p style="font-size:12px;line-height:1.6;color:#444;margin:8px 0">Heavy brown sweatshirt with all-over white graffiti / scribble print. Ribbed crew neck + cuffs. Oversized, street fit. Thick, warm, no hood.</p><div class="btn-stack"><button class="add-cart" onclick="addToCart('Brown Graffiti Crewneck - $35',35)">ADD TO CART — $35</button><button class="buy-shop" onclick="addToCart('Brown Graffiti Crewneck - $35',35);toggleCart(true)">BUY NOW — $35</button><button class="wish-big" onclick="toggleWishlist(10,this)">♡ ADD TO WISHLIST</button></div><div class="delivery">🚚 <b>Delivery — Monrovia $3-$5 • Outside $15-$30</b></div></div></div>
+
+<div class="crumb" id="adidas">Home / Hoodies / <b>Blue Adidas Hoodie — 3-Stripes</b></div>
+<div class="product"><div class="left"><div style="position:relative"><div class="main-img" id="sliderAdidas"><img id="imgAdidas" src="assets/photos/IMG-20261115-WA6989.jpg"><div class="zoom-hint" id="adidasLabel" style="left:10px">1 / 4 — Front</div><div class="zoom-hint" style="right:10px">Swipe ◀ ▶</div></div><button class="arrow-btn" style="left:8px" onclick="slideProduct('adidas',-1)">‹</button><button class="arrow-btn" style="right:8px" onclick="slideProduct('adidas',1)">›</button></div><div class="dots" id="dotsAdidas"><span class="active" onclick="goSlide('adidas',0)"></span><span onclick="goSlide('adidas',1)"></span><span onclick="goSlide('adidas',2)"></span><span onclick="goSlide('adidas',3)"></span></div><div class="thumbs" id="thumbsAdidas"><div class="active" onclick="goSlide('adidas',0)"><img src="assets/photos/IMG-20261115-WA6989.jpg"><span>Front</span></div><div onclick="goSlide('adidas',1)"><img src="assets/photos/IMG-20261115-WA2719.jpg"><span>Back</span></div><div onclick="goSlide('adidas',2)"><img src="assets/photos/IMG-20261115-WA6174.jpg"><span>Neck</span></div><div onclick="goSlide('adidas',3)"><img src="assets/photos/IMG-20261115-WA9482.jpg"><span>Sleeve</span></div></div></div>
+<div class="right"><span class="badge">NEW • SPORTY</span><h1>Blue Adidas Hoodie — 3-Stripes</h1><div class="sku">SKU: XSS-ADI-BLU</div><div class="stars">★★★★★ <span>5.0 | New Drop</span></div><div class="price">$35 <s>$45</s></div><p style="font-size:12px;line-height:1.6;color:#444;margin:8px 0">Deep blue pullover hoodie with white 3-stripes on shoulders, small white Adidas logo on chest, kangaroo pocket + hood. Soft fleece inside.</p><div class="btn-stack"><button class="add-cart" onclick="addToCart('Blue Adidas Hoodie - $35',35)">ADD TO CART — $35</button><button class="buy-shop" onclick="addToCart('Blue Adidas Hoodie - $35',35);toggleCart(true)">BUY NOW — $35</button><button class="wish-big" onclick="toggleWishlist(11,this)">♡ ADD TO WISHLIST</button></div><div class="delivery">🚚 <b>Delivery — Monrovia $3-$5 • Outside $15-$30</b></div></div></div>
+
+<div class="crumb" id="polo">Home / Hoodies / <b>White Polo Hoodie — Colour Splash</b></div>
+<div class="product"><div class="left"><div style="position:relative"><div class="main-img" id="sliderPolo"><img id="imgPolo" src="assets/photos/IMG-20261115-WA0886.jpg"><div class="zoom-hint" id="poloLabel" style="left:10px">1 / 4 — Front</div><div class="zoom-hint" style="right:10px">Swipe ◀ ▶</div></div><button class="arrow-btn" style="left:8px" onclick="slideProduct('polo',-1)">‹</button><button class="arrow-btn" style="right:8px" onclick="slideProduct('polo',1)">›</button></div><div class="dots" id="dotsPolo"><span class="active" onclick="goSlide('polo',0)"></span><span onclick="goSlide('polo',1)"></span><span onclick="goSlide('polo',2)"></span><span onclick="goSlide('polo',3)"></span></div><div class="thumbs" id="thumbsPolo"><div class="active" onclick="goSlide('polo',0)"><img src="assets/photos/IMG-20261115-WA0886.jpg"><span>Front</span></div><div onclick="goSlide('polo',1)"><img src="assets/photos/IMG-20261115-WA2671.jpg"><span>Back</span></div><div onclick="goSlide('polo',2)"><img src="assets/photos/IMG-20261115-WA5553.jpg"><span>Neck</span></div><div onclick="goSlide('polo',3)"><img src="assets/photos/IMG-20261115-WA8590.jpg"><span>Sleeve</span></div></div></div>
+<div class="right"><span class="badge">NEW • BOLD</span><h1>White Polo Hoodie — Colour Splash</h1><div class="sku">SKU: XSS-POLO-WHT</div><div class="stars">★★★★★ <span>5.0 | New Drop</span></div><div class="price">$35 <s>$45</s></div><p style="font-size:12px;line-height:1.6;color:#444;margin:8px 0">Cream white hoodie with colourful paint splatter print + big multicolour Polo script on chest. Drawstring hood, kangaroo pocket, ribbed cuffs.</p><div class="btn-stack"><button class="add-cart" onclick="addToCart('White Polo Splash Hoodie - $35',35)">ADD TO CART — $35</button><button class="buy-shop" onclick="addToCart('White Polo Splash Hoodie - $35',35);toggleCart(true)">BUY NOW — $35</button><button class="wish-big" onclick="toggleWishlist(12,this)">♡ ADD TO WISHLIST</button></div><div class="delivery">🚚 <b>Delivery — Monrovia $3-$5 • Outside $15-$30</b></div></div></div>
+
+<div class="crumb" id="tee">Home / Tees / <b>XSSENCE Tee - Black</b></div>
+<div class="product"><div class="left"><div style="position:relative"><div class="main-img" id="sliderTee"><img id="imgTee" src="assets/photos/IMG-20261114-WA5211.jpg"><div class="zoom-hint" id="teeLabel" style="left:10px">1 / 5 — Front</div><div class="zoom-hint" style="right:10px">Swipe ◀ ▶</div></div><button class="arrow-btn" style="left:8px" onclick="slideProduct('tee',-1)">‹</button><button class="arrow-btn" style="right:8px" onclick="slideProduct('tee',1)">›</button></div><div class="dots" id="dotsTee"><span class="active" onclick="goSlide('tee',0)"></span><span onclick="goSlide('tee',1)"></span><span onclick="goSlide('tee',2)"></span><span onclick="goSlide('tee',3)"></span><span onclick="goSlide('tee',4)"></span></div><div class="thumbs" id="thumbsTee"><div class="active" onclick="goSlide('tee',0)"><img src="assets/photos/IMG-20261114-WA5211.jpg"><span>Front</span></div><div onclick="goSlide('tee',1)"><img src="assets/photos/IMG-20261114-WA3719.jpg"><span>Back</span></div><div onclick="goSlide('tee',2)"><img src="assets/photos/IMG-20261114-WA5542.jpg"><span>Neck</span></div><div onclick="goSlide('tee',3)"><img src="assets/photos/IMG-20261114-WA8188.jpg"><span>Sleeve</span></div><div onclick="goSlide('tee',4)"><img src="assets/photos/IMG-20261114-WA9099.jpg"><span>Logo</span></div></div></div>
+<div class="right"><span class="badge">Best Seller</span><h1>XSSENCE Tee - <span id="teeColorName">Black</span></h1><div class="sku">SKU: XSS-TEE-001</div><div class="stars">★★★★★ <span>4.8 | 268 Reviews</span></div><div class="price">$20 <s>$35</s></div><div class="trust"><div>🧵 220 GSM Cotton</div><div>✨ No Fade</div><div>♻️ Breathable</div><div>💎 Designer Choice</div></div><div class="bundle-title">Bundle & Save</div><div class="bundles"><div class="bundle" onclick="selectBundle(this,'cartPrice2')"><h4>Pack of 1</h4><p>Single Tee</p><div class="bprice">$20<s>$35</s></div></div><div class="bundle selected" onclick="selectBundle(this,'cartPrice2')"><div class="tag popular">Most Popular</div><h4>Pack of 2</h4><p>2 Tees</p><div class="bprice">$35<s>$40</s></div></div><div class="bundle" onclick="selectBundle(this,'cartPrice2')"><div class="tag">High Value</div><h4>Pack of 3</h4><p>Full Set</p><div class="bprice">$75<s>$85</s></div></div></div><div class="btn-stack"><button class="add-cart" onclick="addBundleToCart('XSSENCE Tee Bundle','cartPrice2')">ADD TO CART — <span id="cartPrice2">$35</span></button><button class="buy-shop" onclick="addBundleToCart('XSSENCE Tee Bundle','cartPrice2');toggleCart(true)">BUY NOW — $35</button><button class="wish-big" onclick="toggleWishlist(2,this)">♡ ADD TO WISHLIST</button></div><div class="delivery">🚚 <b>Delivery — Monrovia $3-$5 • Outside $15-$30</b></div></div></div>
+
+<div class="crumb" id="joggers">Home / Joggers / <b>XSSENCE Joggers - Black</b></div>
+<div class="product"><div class="left"><div style="position:relative"><div class="main-img" id="sliderJoggers"><img id="imgJoggers" src="assets/photos/IMG-20261114-WA5956.jpg"><div class="zoom-hint" id="joggersLabel" style="left:10px">1 / 5 — Front</div><div class="zoom-hint" style="right:10px">Swipe ◀ ▶</div></div><button class="arrow-btn" style="left:8px" onclick="slideProduct('joggers',-1)">‹</button><button class="arrow-btn" style="right:8px" onclick="slideProduct('joggers',1)">›</button></div><div class="dots" id="dotsJoggers"><span class="active" onclick="goSlide('joggers',0)"></span><span onclick="goSlide('joggers',1)"></span><span onclick="goSlide('joggers',2)"></span><span onclick="goSlide('joggers',3)"></span><span onclick="goSlide('joggers',4)"></span></div><div class="thumbs" id="thumbsJoggers"><div class="active" onclick="goSlide('joggers',0)"><img src="assets/photos/IMG-20261114-WA5956.jpg"><span>Front</span></div><div onclick="goSlide('joggers',1)"><img src="assets/photos/IMG-20261114-WA6723.jpg"><span>Back</span></div><div onclick="goSlide('joggers',2)"><img src="assets/photos/IMG-20261114-WA2062.jpg"><span>Waist</span></div><div onclick="goSlide('joggers',3)"><img src="assets/photos/IMG-20261114-WA3669.jpg"><span>Ankle</span></div><div onclick="goSlide('joggers',4)"><img src="assets/photos/IMG-20261114-WA5493.jpg"><span>Logo</span></div></div></div>
+<div class="right"><span class="badge">Best Seller</span><h1>XSSENCE Joggers - Black</h1><div class="sku">SKU: XSS-JG-001</div><div class="stars">★★★★★ <span>4.9 | 198 Reviews</span></div><div class="price">$30 <s>$40</s></div><div class="trust"><div>🧵 380 GSM Cotton</div><div>✨ No Fade</div><div>♻️ Stretch Fit</div><div>💎 Designer Choice</div></div><div class="bundle-title">Bundle & Save</div><div class="bundles"><div class="bundle" onclick="selectBundle(this,'cartPrice3')"><h4>Pack of 1</h4><p>Single Joggers</p><div class="bprice">$30<s>$40</s></div></div><div class="bundle selected" onclick="selectBundle(this,'cartPrice3')"><div class="tag popular">Most Popular</div><h4>Pack of 2</h4><p>Joggers + Tee</p><div class="bprice">$40<s>$50</s></div></div><div class="bundle" onclick="selectBundle(this,'cartPrice3')"><div class="tag">High Value</div><h4>Pack of 3</h4><p>Full Set</p><div class="bprice">$75<s>$85</s></div></div></div><div class="btn-stack"><button class="add-cart" onclick="addBundleToCart('XSSENCE Joggers Bundle','cartPrice3')">ADD TO CART — <span id="cartPrice3">$40</span></button><button class="buy-shop" onclick="addBundleToCart('XSSENCE Joggers Bundle','cartPrice3');toggleCart(true)">BUY NOW — $40</button><button class="wish-big" onclick="toggleWishlist(3,this)">♡ ADD TO WISHLIST</button></div><div class="delivery">🚚 <b>Delivery — Monrovia $3-$5 • Outside $15-$30</b></div></div></div>
+
+<div class="crumb" id="longsleeve">Home / Long Sleeve / <b>Long Sleeve Shirt - Black</b></div>
+<div class="product"><div class="left"><div style="position:relative"><div class="main-img" id="sliderLongsleeve"><img id="imgLongSleeve" src="assets/photos/IMG-20261115-WA1956.jpg"><div class="zoom-hint" id="longsleeveLabel" style="left:10px">1 / 5 — Front</div><div class="zoom-hint" style="right:10px">Swipe ◀ ▶</div></div><button class="arrow-btn" style="left:8px" onclick="slideProduct('longsleeve',-1)">‹</button><button class="arrow-btn" style="right:8px" onclick="slideProduct('longsleeve',1)">›</button></div><div class="dots" id="dotsLongsleeve"><span class="active" onclick="goSlide('longsleeve',0)"></span><span onclick="goSlide('longsleeve',1)"></span><span onclick="goSlide('longsleeve',2)"></span><span onclick="goSlide('longsleeve',3)"></span><span onclick="goSlide('longsleeve',4)"></span></div><div class="thumbs"><div class="active" onclick="goSlide('longsleeve',0)"><img src="assets/photos/IMG-20261115-WA1956.jpg"><span>Front</span></div><div onclick="goSlide('longsleeve',1)"><img src="assets/photos/IMG-20261115-WA6008.jpg"><span>Back</span></div><div onclick="goSlide('longsleeve',2)"><img src="assets/photos/IMG-20261115-WA0477.jpg"><span>Neck</span></div><div onclick="goSlide('longsleeve',3)"><img src="assets/photos/IMG-20261115-WA8593.jpg"><span>Sleeve</span></div><div onclick="goSlide('longsleeve',4)"><img src="assets/photos/IMG-20261115-WA6261.jpg"><span>Logo</span></div></div></div>
+<div class="right"><span class="badge">NEW</span><h1>Long Sleeve Shirt - Black</h1><div class="stars">★★★★★ <span>4.9 | New</span></div><div class="price">$30 <s>$35</s></div><div class="trust"><div>🧵 Premium Cotton</div><div>✨ No Fade</div><div>♻️ Breathable</div><div>💎 Designer Choice</div></div><div class="btn-stack"><button class="add-cart" onclick="addToCart('Long Sleeve Shirt - $30',30)">ADD TO CART — $30</button><button class="buy-shop" onclick="addToCart('Long Sleeve Shirt - $30',30);toggleCart(true)">BUY NOW — $30</button><button class="wish-big" onclick="toggleWishlist(4,this)">♡ ADD TO WISHLIST</button></div><div class="delivery">🚚 <b>Delivery — Monrovia $3-$5 • Outside $15-$30</b></div></div></div>
+
+<div class="section" style="background:#f9f9f9;border-top:1px solid #eee;border-bottom:1px solid #eee"><h2>🔥 PAIRED ITEMS — MATCHED SETS</h2><div class="sub">Long Sleeve + Underwear • Tee + Underwear • Hoodie + Joggers + Underwear</div><div class="grid"><div class="card"><div class="img"><img src="assets/photos/IMG-20261115-WA1956.jpg"></div><h3>Long Sleeve + Underwear</h3><p class="price">$40 <s>$45</s></p><button class="add-btn" onclick="addPair('Long Sleeve + Underwear Pair',40)">Add Pair — $40</button></div><div class="card"><div class="img"><img src="assets/photos/IMG-20261114-WA5211.jpg" alt="Black XSSENCE tee"></div><h3>Tee + Underwear</h3><p class="price">$30 <s>$35</s></p><button class="add-btn" onclick="addPair('Tee + Underwear Pair',30)">Add Pair — $30</button></div><div class="card"><div class="img"><img src="assets/photos/IMG-20261114-WA3069.jpg" alt="Black XSSENCE hoodie"></div><h3>Hoodie + Joggers + Underwear</h3><p class="price">$85 <s>$100</s></p><button class="add-btn" onclick="addPair('Hoodie + Joggers + Underwear',85)">Add Pair — $85</button></div></div></div>
+<section class="section photo-gallery" id="photo-gallery">
+  <h2>THE COLLECTION — ALL PHOTOS</h2>
+  <div class="sub">Browse every product and detail photo from this drop.</div>
+  <div class="photo-gallery-controls" id="photoGalleryFilters">
+    <button class="active" onclick="renderPhotoGallery('all',this)">All Photos</button>
+    <button onclick="renderPhotoGallery('Hoodies',this)">Hoodies</button>
+    <button onclick="renderPhotoGallery('Tees',this)">Tees</button>
+    <button onclick="renderPhotoGallery('Joggers',this)">Joggers</button>
+    <button onclick="renderPhotoGallery('Jerseys',this)">Jerseys</button>
+    <button onclick="renderPhotoGallery('Crewnecks',this)">Crewnecks</button>
+  </div>
+  <div class="photo-gallery-grid" id="photoGalleryGrid"></div>
+</section>
+
+<div class="section" id="buildPair" style="background:#fff;border-bottom:1px solid #eee"><h2>🛠️ BUILD YOUR OWN — PICK 2 OR 3, SAVE AUTOMATICALLY</h2><div class="sub">Pick Any 2 = 10% OFF • Pick Any 3 = 15% OFF</div><div style="max-width:800px;margin:0 auto;background:#f9f9f9;border:1.5px solid #111;border-radius:14px;padding:16px"><div style="display:flex;gap:8px;margin-bottom:12px"><button id="mode2Btn" onclick="setPairMode(2)" style="flex:1;padding:11px;border-radius:50px;border:1.5px solid #111;background:#111;color:#fff;font-weight:800;font-size:12px;cursor:pointer">Pair of 2 — 10% OFF</button><button id="mode3Btn" onclick="setPairMode(3)" style="flex:1;padding:11px;border-radius:50px;border:1.5px solid #ddd;background:#fff;font-weight:800;font-size:12px;cursor:pointer">Set of 3 — 15% OFF 🔥</button></div><label style="display:flex;align-items:center;gap:8px;background:#FFF8E1;border:1px solid #FFCC00;border-radius:10px;padding:10px;font-size:12px;font-weight:700;margin-bottom:12px;cursor:pointer"><input type="checkbox" id="sameColorCheck" onchange="applySameColor()" style="width:18px;height:18px"> ✅ Same Colour For All Items <span id="sameColorLabel" style="font-weight:400;color:#666;margin-left:auto;font-size:11px">Off — mix colours</span></label><div style="background:#fff;border:1px solid #eee;border-radius:10px;padding:12px;margin-bottom:10px"><b style="font-size:12px">1. Pick Item 1</b><select id="pair1Item" onchange="calcPair()" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:10px;margin:8px 0;font-size:12px"><option value="35" data-name="Hoodie">Hoodie — $35</option><option value="20" data-name="Tee">Tee — $20</option><option value="30" data-name="Long Sleeve Shirt">Long Sleeve Shirt — $30</option><option value="30" data-name="Joggers">Joggers — $30</option><option value="15" data-name="Underwear (3 Pack)">Underwear (3 Pack) — $15</option><option value="20" data-name="Shorts">Shorts — $20</option><option value="12" data-name="Cap">Cap — $12</option><option value="35" data-name="Dodgers Jersey">Dodgers Jersey — $35</option><option value="35" data-name="Graffiti Crewneck">Graffiti Crewneck — $35</option><option value="35" data-name="Blue Adidas Hoodie">Blue Adidas Hoodie — $35</option><option value="35" data-name="White Polo Hoodie">White Polo Hoodie — $35</option></select><div style="display:flex;gap:8px"><select id="pair1Color" onchange="onColorChange(1)" style="flex:1;padding:9px;border:1px solid #ddd;border-radius:10px;font-size:11px"><option>Black</option><option>White</option><option>Grey</option><option>Olive</option><option>Mocha</option><option>Navy</option><option>Blue</option><option>Brown</option></select><select id="pair1Size" onchange="calcPair()" style="flex:1;padding:9px;border:1px solid #ddd;border-radius:10px;font-size:11px"><option>S</option><option>M</option><option selected>L</option><option>XL</option><option>XXL</option></select></div></div><div style="background:#fff;border:1px solid #eee;border-radius:10px;padding:12px;margin-bottom:10px"><b style="font-size:12px">2. Pick Item 2</b><select id="pair2Item" onchange="calcPair()" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:10px;margin:8px 0;font-size:12px"><option value="15" data-name="Underwear (3 Pack)">Underwear (3 Pack) — $15</option><option value="35" data-name="Hoodie">Hoodie — $35</option><option value="20" data-name="Tee">Tee — $20</option><option value="30" data-name="Long Sleeve Shirt">Long Sleeve Shirt — $30</option><option value="30" data-name="Joggers">Joggers — $30</option><option value="20" data-name="Shorts">Shorts — $20</option><option value="12" data-name="Cap">Cap — $12</option><option value="35" data-name="Dodgers Jersey">Dodgers Jersey — $35</option><option value="35" data-name="Graffiti Crewneck">Graffiti Crewneck — $35</option></select><div style="display:flex;gap:8px"><select id="pair2Color" onchange="onColorChange(2)" style="flex:1;padding:9px;border:1px solid #ddd;border-radius:10px;font-size:11px"><option>Black</option><option>White</option><option>Grey</option><option>Olive</option><option>Mocha</option><option>Navy</option><option>Blue</option><option>Brown</option></select><select id="pair2Size" onchange="calcPair()" style="flex:1;padding:9px;border:1px solid #ddd;border-radius:10px;font-size:11px"><option>S</option><option>M</option><option selected>L</option><option>XL</option><option>XXL</option></select></div></div><div id="pair3Box" style="display:none;background:#fff;border:2px solid #111;border-radius:10px;padding:12px;margin-bottom:10px"><b style="font-size:12px">3. Pick Item 3 <span style="background:#D32F2F;color:#fff;font-size:10px;padding:2px 6px;border-radius:20px">15% OFF</span></b><select id="pair3Item" onchange="calcPair()" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:10px;margin:8px 0;font-size:12px"><option value="30" data-name="Joggers">Joggers — $30</option><option value="35" data-name="Hoodie">Hoodie — $35</option><option value="20" data-name="Tee">Tee — $20</option><option value="30" data-name="Long Sleeve Shirt">Long Sleeve Shirt — $30</option><option value="15" data-name="Underwear (3 Pack)">Underwear (3 Pack) — $15</option><option value="35" data-name="Dodgers Jersey">Dodgers Jersey — $35</option></select><div style="display:flex;gap:8px"><select id="pair3Color" onchange="onColorChange(3)" style="flex:1;padding:9px;border:1px solid #ddd;border-radius:10px;font-size:11px"><option>Black</option><option>White</option><option>Grey</option><option>Olive</option><option>Mocha</option><option>Navy</option><option>Blue</option><option>Brown</option></select><select id="pair3Size" onchange="calcPair()" style="flex:1;padding:9px;border:1px solid #ddd;border-radius:10px;font-size:11px"><option>S</option><option>M</option><option selected>L</option><option>XL</option><option>XXL</option></select></div></div><div style="background:#111;color:#fff;border-radius:10px;padding:12px;text-align:center"><div style="font-size:11px;color:#ccc">Normal Total: <s id="pairNormal">$50</s> • You Save <span id="pairSave" style="color:#ffcc00">$5 (10%)</span></div><div style="font-size:20px;font-weight:900;margin-top:4px">Pair Price: <span id="pairTotal">$45</span></div><div id="pairSummary" style="font-size:11px;color:#ccc;margin-top:4px">Hoodie (Black / L) + Underwear (Black / L)</div></div><div class="btn-stack"><button class="add-cart" onclick="addCustomPair()">ADD TO CART — <span id="pairBtnPrice">$45</span></button><button class="buy-shop" onclick="addCustomPair();toggleCart(true)">BUY NOW — <span id="pairBtnPrice2">$45</span></button></div><p style="text-align:center;font-size:11px;color:#666;margin-top:8px">1 delivery fee for all items • Monrovia $3-$5 / Outside $15-$30 • Orange Money 0778 455 814</p></div></div>
+<div class="compare"><h2>Why XSSENCE?</h2><table><tr><th>Feature</th><th>XSSENCE</th><th>Competitor A</th><th>Competitor B</th></tr><tr><td>Heavyweight Cotton</td><td class="tick">✓</td><td class="cross">✕</td><td class="cross">✕</td></tr><tr><td>No Fade, No Shrink</td><td class="tick">✓</td><td class="cross">✕</td><td class="tick">✓</td></tr><tr><td>Orange Money / MoMo</td><td class="tick">✓</td><td class="cross">✕</td><td class="cross">✕</td></tr><tr><td>Fast Monrovia Delivery</td><td class="tick">✓</td><td class="cross">✕</td><td class="cross">✕</td></tr></table></div>
+<div class="brand"><h2>XSSENCE — ALL ESSENCE</h2><p>Less noise, more essence. Designed in Monrovia, made to be worn every day.</p><div class="brand-grid"><div><b>🧵 PREMIUM FABRIC</b><span>400 GSM Hoodie / 220 GSM Tee / 380 GSM Joggers.</span></div><div><b>✂️ MADE FOR LIBERIA</b><span>Quality checked by hand.</span></div><div><b>♻️ BUILT TO LAST</b><span>No fade, no shrink, no pilling.</span></div></div></div>
+
+<!-- AUTH -->
+<div id="authModal"><h3>👤 Login / Signup <button class="close-cart" onclick="toggleAuth()">✕</button></h3><div class="auth-tabs"><button id="tabLogin" class="active" onclick="switchAuthTab('login')">Login</button><button id="tabSignup" onclick="switchAuthTab('signup')">Signup</button></div>
+<div id="loginForm" class="auth-form"><p style="font-size:11px;color:#666;margin-bottom:8px">Login with your account email and password.</p><input id="loginEmailOrPhone" type="email" placeholder="Email — e.g. john@gmail.com"><input id="loginPassword" type="password" placeholder="Password"><button onclick="loginUser()" style="background:#111;color:#fff;border:none;width:100%;padding:12px;border-radius:50px;font-weight:800;cursor:pointer">Login →</button><button onclick="loginWithOTP()" style="background:#fff;color:#111;border:1.5px solid #111;width:100%;padding:12px;border-radius:50px;font-weight:800;cursor:pointer;margin-top:8px">Verify Phone for Checkout 📱</button><p style="font-size:11px;color:#666;text-align:center;margin-top:8px">No account? <b onclick="switchAuthTab('signup')" style="cursor:pointer;color:#111">Create one →</b></p></div>
+<div id="signupForm" class="auth-form" style="display:none"><p style="font-size:11px;color:#666;margin-bottom:8px">Create account — we save your wishlist, orders & delivery address.</p><input id="suName" placeholder="Full Name *"><input id="suEmail" placeholder="Email * — e.g. john@gmail.com"><input id="suPhone" placeholder="Phone * — e.g. 0778 566 814"><input id="suPassword" type="password" placeholder="Create Password * (min 6)"><select id="suCounty"><option>Monrovia</option><option>Paynesville</option><option>Bushrod Island</option><option>Congo Town / Sinkor</option><option>Outside Monrovia</option></select><input id="suAddress" placeholder="Community / Street / Landmark *"><input id="suLandmark" placeholder="Landmark (optional) — e.g. Near Total Gas Station"><button onclick="getLocation()" style="background:#FFF8E1;color:#111;border:1px solid #FFCC00;width:100%;padding:10px;border-radius:50px;font-weight:700;cursor:pointer;margin-bottom:8px">📍 Use My Current Location (GPS)</button><p id="gpsStatus" style="font-size:11px;color:#666;margin-bottom:8px"></p><label style="font-size:11px"><input type="checkbox" id="suAgree" checked> I agree to receive order updates on WhatsApp</label><button onclick="signupUser()" style="background:#111;color:#fff;border:none;width:100%;padding:12px;border-radius:50px;font-weight:800;cursor:pointer;margin-top:8px">Create Account →</button></div></div>
+
+<!-- ACCOUNT -->
+<div id="accountDrawer"><h3>My Account 👤 <button class="close-cart" onclick="toggleAccount()">✕</button></h3><div id="accountInfo" style="background:#f9f9f9;border:1px solid #eee;border-radius:10px;padding:12px;font-size:12px;line-height:1.7"></div><h4 style="margin:12px 0 6px;font-size:12px">Edit Location & Delivery</h4><div class="auth-form"><select id="accCounty"><option>Monrovia</option><option>Paynesville</option><option>Bushrod Island</option><option>Congo Town / Sinkor</option><option>Outside Monrovia</option></select><input id="accAddress" placeholder="Address"><input id="accEmail" placeholder="Email (account login)" readonly><input id="accPhone" placeholder="Phone"><button onclick="saveLocation()" style="background:#111;color:#fff;border:none;width:100%;padding:11px;border-radius:50px;font-weight:800;cursor:pointer">Save Location & Details</button></div><h4 style="margin:12px 0 6px;font-size:12px">My Orders</h4><div id="myOrders" style="font-size:11px;color:#666">No orders yet.</div><button onclick="logoutUser()" style="background:#fff;color:#D32F2F;border:1.5px solid #D32F2F;width:100%;padding:12px;border-radius:50px;font-weight:800;cursor:pointer;margin-top:12px">Logout / Sign Out</button></div>
+
+<!-- WISHLIST -->
+<div id="wishDrawer"><h3>My Wishlist ❤️ <button class="close-cart" onclick="toggleWishDrawer()">✕</button></h3><p style="font-size:11px;color:#666;margin-bottom:10px">Saved items stay here even if you close the page.</p><ul id="wishItems"></ul><p id="wishEmpty">No wishlist yet. Tap ❤️ on any product to save it.</p><button onclick="sendWishlistToWhatsApp()" style="background:#25D366;color:#fff;border:none;width:100%;padding:12px;border-radius:50px;font-weight:800;margin-top:12px;cursor:pointer">💬 Send My Wishlist To WhatsApp</button><button onclick="copyWishlistReminder()" style="background:#ffcc00;color:#111;border:none;width:100%;padding:12px;border-radius:50px;font-weight:800;margin-top:8px;cursor:pointer">📋 Copy Reminder Template (For Seller)</button><button onclick="addAllWishlistToCart()" style="background:#fff;color:#111;border:1.5px solid #111;width:100%;padding:12px;border-radius:50px;font-weight:800;margin-top:8px;cursor:pointer">Add All Wishlist To Cart 🛒</button></div>
+
+<!-- CART -->
+<div id="cartDrawer"><h3>Your Cart 🛒 <button class="close-cart" onclick="toggleCart()">✕</button></h3><div id="cartUserBanner" style="font-size:11px;background:#FFF8E1;border:1px solid #FFCC00;border-radius:10px;padding:8px;margin-bottom:8px;display:none"></div><ul id="cartItems"></ul><p id="emptyMsg">Cart is empty. Add something.</p><div class="cart-total"><span>Items Total:</span><span id="cartTotal">$0</span></div><div class="pay-box"><b>💰 How To Pay:</b><br>1. <b>Orange Money:</b> 0778 455 814<br>2. <b>MTN MoMo:</b> Ask on WhatsApp<br>3. <b>Cash on Delivery</b> (Monrovia)</div><div class="checkout-form"><h4 style="margin:8px 0;font-size:12px">Delivery Details — Auto-filled if logged in</h4><input id="custName" placeholder="Full Name"><input id="custEmail" placeholder="Email — e.g. john@gmail.com"><input id="custPhone" placeholder="Phone — e.g. 0778 566 814"><select id="custCounty"><option>Monrovia — $3-$5</option><option>Paynesville — $3-$5</option><option>Bushrod Island — $3-$5</option><option>Congo Town / Sinkor — $3-$5</option><option>Outside Monrovia — $15-$30</option><option>Pickup — FREE</option></select><input id="custAddress" placeholder="Community / Street / Landmark"><select id="payMethod"><option>Orange Money — 0778 455 814</option><option>MTN MoMo</option><option>Cash on Delivery (Monrovia)</option><option>Cash on Pickup</option></select></div><div class="otp-box"><b style="font-size:12px">📱 Verify Phone — One Time OTP</b><p style="font-size:11px;color:#666;margin:4px 0">Required before checkout. A real SMS code will be sent.</p><div style="display:flex;gap:6px"><input id="otpPhone" placeholder="Phone — e.g. 0778 566 814" style="margin:0"><button onclick="sendOTP()" id="sendOtpBtn" style="background:#111;color:#fff;border:none;padding:10px 12px;border-radius:10px;font-weight:800;cursor:pointer;font-size:11px;white-space:nowrap">Send OTP</button></div><div id="otpBox" style="display:none;margin-top:8px"><div style="display:flex;gap:6px"><input id="otpCode" placeholder="Enter 6-digit code" maxlength="6" style="margin:0;text-align:center;letter-spacing:3px;font-weight:900"><button onclick="verifyOTP()" style="background:#2E7D32;color:#fff;border:none;padding:10px 12px;border-radius:10px;font-weight:800;cursor:pointer;font-size:11px">Verify</button></div><p id="otpMsg" style="font-size:11px;margin-top:6px;color:#666">Enter the 6-digit code sent to your phone.</p></div><p id="otpVerified" style="display:none;color:#2E7D32;font-weight:800;font-size:12px;margin-top:6px">✅ Phone Verified — You can place order now</p><p id="otpNotVerified" style="font-size:11px;color:#D32F2F;margin-top:6px">🔒 Place Order is locked until OTP is verified</p></div><button id="checkoutBtn" onclick="checkout()" disabled>🔒 Verify OTP First — Place Order</button><button class="checkout-wa" id="checkoutWaBtn" onclick="checkoutWhatsApp()" disabled>🔒 Verify OTP First — Send To WhatsApp</button></div>
+<footer>© 2026 XSSENCE LIBERIA • MONROVIA • WhatsApp +231 778 566 814 • Orange Money 0778 455 814 • <span id="apiStatus" style="color:#888">Backend: Checking...</span> • <span id="supabaseStatus" style="color:#888">Supabase Auth: Checking...</span></footer>
+<script>
+const SUPABASE_URL = "https://ghzhaktyadixqzswddhe.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdoemhha3R5YWRpeHF6c3dkZGhlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ4MDM3NTAsImV4cCI6MjExMDM3OTc1MH0.BfBzjscFBxmsfdYFqsrKrAHyWzexCLEPlnYUZx_nhCQ";
+const supabaseClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+// ===== CONFIG - CHANGE THIS TO YOUR BACKEND URL WHEN LIVE =====
+// Local: http://localhost:5000  | Live: https://your-backend.onrender.com
+const API_BASE_URL = `${window.location.protocol}//${window.location.hostname}:5000`;
+const API = {
+  async call(endpoint, method="GET", body=null, needsAuth=true){
+    try{
+      let headers={"Content-Type":"application/json"};
+      let token = localStorage.getItem('xssence_token');
+      if(needsAuth && token) headers['Authorization']='Bearer '+token;
+      let res = await fetch(API_BASE_URL+endpoint,{method, headers, body: body?JSON.stringify(body):null});
+      let data = await res.json();
+      if(!res.ok) throw new Error(data.error||'API error');
+      return data;
+    }catch(e){ console.log("API fallback to local mode:",e.message); return null; }
+  },
+  signup: async (data)=>{
+    const {data:authData,error}=await supabaseClient.auth.signUp({
+      email:data.email,
+      password:data.password,
+      options:{data:{
+        name:data.name||data.fullName||'',
+        phone:data.phone||'',
+        county:data.county||'Monrovia',
+        address:data.address||'',
+        landmark:data.landmark||'',
+        lat:data.lat||null,
+        lng:data.lng||null
+      }}
+    });
+    if(error) throw error;
+    if(authData.user&&authData.session){
+      const {error:customerError}=await supabaseClient.from('customers').insert([{
+        id:authData.user.id,
+        name:data.name||data.fullName||'',
+        email:data.email,
+        phone:data.phone||''
+      }]);
+      if(customerError) throw new Error('Account created, but customer profile could not be saved: '+customerError.message);
+    }
+    return {success:true,user:authData.user,token:authData.session?.access_token||''};
+  },
+  login: async (data)=>{
+    const {data:authData,error}=await supabaseClient.auth.signInWithPassword({email:data.email,password:data.password});
+    if(error) throw error;
+    return {success:true,user:authData.user,token:authData.session.access_token};
+  },
+  logout: ()=> API.call("/api/auth/logout","POST",{}),
+  getMe: ()=> API.call("/api/auth/me","GET"),
+  sendOTP: (phone)=> API.call("/api/auth/send-otp","POST",{phone},false),
+  verifyOTP: (phone,code)=> API.call("/api/auth/verify-otp","POST",{phone,code},false),
+  getWishlist: ()=> API.call("/api/wishlist","GET"),
+  addWishlist: (productId)=> API.call("/api/wishlist/add","POST",{productId}),
+  removeWishlist: (productId)=> API.call("/api/wishlist/remove","POST",{productId}),
+  createOrder: (order)=> API.call("/api/orders","POST",order),
+  myOrders: ()=> API.call("/api/orders/my-orders","GET"),
+  saveLocation: (loc)=> API.call("/api/location/save","POST",loc),
+  health: ()=> API.call("/api/health","GET",null,false),
+};
+let currentUser = null;
+localStorage.removeItem('xssence_users');
+localStorage.removeItem('xssence_token');
+localStorage.removeItem('xssence_user');
+let userOrders = JSON.parse(localStorage.getItem('xssence_orders')||'[]');
+function escapeHTML(value){ return String(value==null?'':value).replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char])); }
+function profileFromAuthUser(user){
+  let metadata=user.user_metadata||{};
+  return {
+    id:user.id,
+    name:metadata.name||metadata.full_name||'',
+    email:user.email||'',
+    phone:metadata.phone||'',
+    county:metadata.county||'Monrovia',
+    address:metadata.address||'',
+    landmark:metadata.landmark||'',
+    lat:metadata.lat||null,
+    lng:metadata.lng||null
+  };
+}
+function setAuthenticatedUser(user){
+  currentUser=user?profileFromAuthUser(user):null;
+  updateAuthUI();
+}
+function updateAuthUI(){
+  let logged = !!currentUser;
+  let displayName=logged?(currentUser.name||currentUser.email||currentUser.phone||'Customer'):'';
+  document.getElementById('authBtn').style.display = logged?'none':'block';
+  document.getElementById('accountBtn').style.display = logged?'block':'none';
+  document.getElementById('logoutBtn').style.display = logged?'block':'none';
+  document.getElementById('userGreeting').style.display = logged?'block':'none';
+  if(logged){
+    document.getElementById('userGreeting').innerText = 'Hi, '+displayName.split(' ')[0]+' 👋';
+    document.getElementById('heroAuthMsg').innerText = 'Welcome back, '+displayName+' ❤️ Your wishlist is saved.';
+    document.getElementById('accountInfo').innerHTML = '<b>'+escapeHTML(displayName)+'</b><br>📧 '+escapeHTML(currentUser.email)+'<br>📱 '+escapeHTML(currentUser.phone)+'<br>📍 '+escapeHTML(currentUser.county)+' — '+escapeHTML(currentUser.address)+'<br>📌 Landmark: '+escapeHTML(currentUser.landmark||'—')+'<br>🗺️ GPS: '+(currentUser.lat? escapeHTML(currentUser.lat+', '+currentUser.lng) : 'Not set')+'<br>❤️ Wishlist: '+wishlist.length+' items<br>🛒 Orders: '+userOrders.length;
+    document.getElementById('accCounty').value = currentUser.county||'Monrovia';
+    document.getElementById('accAddress').value = currentUser.address||'';
+    document.getElementById('accEmail').value = currentUser.email||'';
+    document.getElementById('accPhone').value = currentUser.phone||'';
+    if(!document.getElementById('custName').value&&currentUser.name) document.getElementById('custName').value = currentUser.name;
+    if(!document.getElementById('custEmail').value) document.getElementById('custEmail').value = currentUser.email||'';
+    if(!document.getElementById('custPhone').value) document.getElementById('custPhone').value = currentUser.phone||'';
+    if(!document.getElementById('custAddress').value) document.getElementById('custAddress').value = currentUser.address||'';
+    document.getElementById('cartUserBanner').style.display='block';
+    document.getElementById('cartUserBanner').innerHTML = '👋 Logged in as <b>'+escapeHTML(displayName)+'</b> • '+escapeHTML(currentUser.phone)+' • '+escapeHTML(currentUser.county)+' — Checkout will use your saved details.';
+    document.getElementById('myOrders').innerHTML = userOrders.length ? userOrders.map((o,i)=>'<div style="border:1px solid #eee;border-radius:8px;padding:8px;margin-bottom:6px"><b>Order '+(i+1)+' — $'+escapeHTML(o.total)+'</b><br>'+escapeHTML(o.items)+'<br><span style="color:#2E7D32">✅ '+escapeHTML(o.date)+'</span></div>').join('') : 'No orders yet.';
+  } else {
+    document.getElementById('heroAuthMsg').innerText = 'Login to save your wishlist & checkout faster →';
+    document.getElementById('cartUserBanner').style.display='none';
+  }
+}
+function toggleAuth(openOnly){ let d=document.getElementById('authModal'); if(openOnly){d.classList.add('open');return;} d.classList.toggle('open'); }
+function toggleAccount(openOnly){ if(!currentUser){ toggleAuth(true); return; } let d=document.getElementById('accountDrawer'); if(openOnly){d.classList.add('open');return;} d.classList.toggle('open'); }
+function switchAuthTab(tab){ document.getElementById('tabLogin').classList.toggle('active',tab==='login'); document.getElementById('tabSignup').classList.toggle('active',tab==='signup'); document.getElementById('loginForm').style.display=tab==='login'?'block':'none'; document.getElementById('signupForm').style.display=tab==='signup'?'block':'none'; }
+async function signupUser(){
+  let name=document.getElementById('suName').value.trim();
+  let email=document.getElementById('suEmail').value.trim();
+  let phone=document.getElementById('suPhone').value.trim();
+  let pass=document.getElementById('suPassword').value;
+  let county=document.getElementById('suCounty').value;
+  let address=document.getElementById('suAddress').value.trim();
+  let landmark=document.getElementById('suLandmark').value.trim();
+  if(!name||!email||!phone||!pass||!address){ alert('Please fill Name, Email, Phone, Password & Address'); return; }
+  if(pass.length<6){ alert('Password must be at least 6 characters'); return; }
+  if(!supabaseClient){ alert('Supabase is unavailable. Check your internet connection and reload the page.'); return; }
+  let result;
+  try{
+    result=await API.signup({name,email,phone,password:pass,county,address,landmark,lat:window._lat||null,lng:window._lng||null});
+  }catch(requestError){ alert('Signup failed: '+requestError.message); return; }
+  if(!result.token){ alert('Account created. Check your email to confirm the account, then log in.'); switchAuthTab('login'); return; }
+  setAuthenticatedUser(result.user);
+  toggleAuth();
+  alert('✅ Welcome '+name+'! Account created. You are now logged in.');
+}
+async function loginUser(){
+  let id=document.getElementById('loginEmailOrPhone').value.trim();
+  let pass=document.getElementById('loginPassword').value;
+  if(!id||!pass){ alert('Enter your account email and password.'); return; }
+  if(!supabaseClient){ alert('Supabase is unavailable. Check your internet connection and reload the page.'); return; }
+  let data,error;
+  try{ ({data,error}=await supabaseClient.auth.signInWithPassword({email:id,password:pass})); }
+  catch(requestError){ alert('Login failed: '+requestError.message); return; }
+  if(error){ alert('Login failed: '+error.message); return; }
+  setAuthenticatedUser(data.user);
+  toggleAuth();
+  alert('✅ Welcome back '+(currentUser.name||currentUser.email||'Customer')+'!');
+}
+function loginWithOTP(){ toggleAuth(); toggleCart(true); }
+async function logoutUser(){
+  if(!supabaseClient){ alert('Supabase is unavailable. Check your internet connection and reload the page.'); return; }
+  let error;
+  try{ ({error}=await supabaseClient.auth.signOut()); }
+  catch(requestError){ alert('Logout failed: '+requestError.message); return; }
+  if(error){ alert('Logout failed: '+error.message); return; }
+  setAuthenticatedUser(null);
+  let d=document.getElementById('accountDrawer');
+  if(d) d.classList.remove('open');
+  alert('👋 Logged out. See you soon!');
+}
+function getLocation(){ document.getElementById('gpsStatus').innerText='Getting location... Allow GPS in browser.'; if(!navigator.geolocation){ document.getElementById('gpsStatus').innerText='GPS not supported. Enter address manually.'; return; } navigator.geolocation.getCurrentPosition(pos=>{ window._lat=pos.coords.latitude; window._lng=pos.coords.longitude; document.getElementById('gpsStatus').innerText='📍 GPS Saved: '+window._lat.toFixed(4)+', '+window._lng.toFixed(4); },()=>{ document.getElementById('gpsStatus').innerText='GPS denied. Enter address manually.'; }); }
+async function saveLocation(){
+  if(!currentUser) return;
+  if(!supabaseClient){ alert('Supabase is unavailable. Check your internet connection and reload the page.'); return; }
+  const profile={county:document.getElementById('accCounty').value,address:document.getElementById('accAddress').value.trim(),phone:document.getElementById('accPhone').value.trim(),lat:window._lat||currentUser.lat||null,lng:window._lng||currentUser.lng||null};
+  let data,error;
+  try{ ({data,error}=await supabaseClient.auth.updateUser({data:profile})); }
+  catch(requestError){ alert('Could not save your profile: '+requestError.message); return; }
+  if(error){ alert('Could not save your profile: '+error.message); return; }
+  setAuthenticatedUser(data.user);
+  alert('✅ Location & details saved!');
+}
+let PRODUCTS=[
+{id:1,name:"XSSENCE Hoodie",cat:"hoodie",price:35,old:40,img:"assets/photos/IMG-20261114-WA3069.jpg",colors:"Black, White, Grey, Olive, Mocha, Navy",sizes:"S,M,L,XL,XXL",anchor:"hoodie"},
+{id:2,name:"XSSENCE Tee",cat:"tee",price:20,old:35,img:"assets/photos/IMG-20261114-WA5211.jpg",colors:"Black, White, Grey, Olive, Mocha, Navy",sizes:"S,M,L,XL,XXL",anchor:"tee"},
+{id:3,name:"XSSENCE Joggers",cat:"joggers",price:30,old:40,img:"assets/photos/IMG-20261114-WA5956.jpg",colors:"Black, White, Grey, Olive, Mocha, Navy",sizes:"S,M,L,XL,XXL",anchor:"joggers"},
+{id:4,name:"Long Sleeve Shirt",cat:"long-sleeve",price:30,old:35,img:"assets/photos/IMG-20261115-WA1956.jpg",colors:"Black, White, Grey, Navy",sizes:"S,M,L,XL,XXL",anchor:"longsleeve"},
+{id:5,name:"XSSENCE Underwear (3 Pack)",cat:"underwear",price:15,old:20,img:"assets/photos/IMG-20261114-WA5211.jpg",colors:"Black, White, Grey",sizes:"S,M,L,XL,XXL",anchor:"shop"},
+{id:6,name:"XSSENCE Shorts",cat:"shorts",price:20,old:25,img:"assets/photos/IMG-20261114-WA5956.jpg",colors:"Black, Grey, Olive",sizes:"S,M,L,XL,XXL",anchor:"shop"},
+{id:7,name:"XSSENCE Cap",cat:"cap",price:12,old:18,img:"assets/photos/IMG-20261114-WA3069.jpg",colors:"Black, White, Olive",sizes:"One Size",anchor:"shop"},
+{id:8,name:"Full Set - Hoodie + Tee + Joggers",cat:"set",price:75,old:85,img:"assets/photos/IMG-20261114-WA3069.jpg",colors:"Black, White, Grey, Olive, Mocha, Navy",sizes:"S,M,L,XL,XXL",anchor:"shop"},
+{id:9,name:"Dodgers Freeman #5 Jersey",cat:"tee",price:35,old:45,img:"assets/photos/IMG-20261115-WA9250.jpg",colors:"White",sizes:"S,M,L,XL,XXL",anchor:"dodgers"},
+{id:10,name:"Brown Graffiti Crewneck",cat:"long-sleeve",price:35,old:45,img:"assets/photos/IMG-20261115-WA1956.jpg",colors:"Brown, Mocha",sizes:"S,M,L,XL,XXL",anchor:"graffiti"},
+{id:11,name:"Blue Adidas Hoodie",cat:"hoodie",price:35,old:45,img:"assets/photos/IMG-20261115-WA6989.jpg",colors:"Blue",sizes:"S,M,L,XL,XXL",anchor:"adidas"},
+{id:12,name:"White Polo Splash Hoodie",cat:"hoodie",price:35,old:45,img:"assets/photos/IMG-20261115-WA0886.jpg",colors:"White",sizes:"S,M,L,XL,XXL",anchor:"polo"},
+];
+let wishlist = JSON.parse(localStorage.getItem('xssence_wishlist')||'[]');
+let wishlistOnly=false;
+function saveWishlist(){ localStorage.setItem('xssence_wishlist',JSON.stringify(wishlist)); }
+function isWishlisted(id){ return wishlist.includes(id); }
+async function toggleWishlist(id,btn){ if(isWishlisted(id)){ wishlist=wishlist.filter(x=>x!==id); await API.removeWishlist(id); } else { wishlist.push(id); await API.addWishlist(id); } saveWishlist(); updateWishlistUI(); filterProducts(); if(btn){ btn.innerText = isWishlisted(id)?'❤️ SAVED TO WISHLIST':'♡ ADD TO WISHLIST'; } }
+function updateWishlistUI(){ document.getElementById('wishCount').innerText=wishlist.length; let ul=document.getElementById('wishItems'); ul.innerHTML=''; if(!wishlist.length){ document.getElementById('wishEmpty').style.display='block'; return; } document.getElementById('wishEmpty').style.display='none'; wishlist.forEach(id=>{ let p=PRODUCTS.find(x=>x.id===id); if(!p) return; let li=document.createElement('li'); li.innerHTML=`<div style="display:flex;gap:10px;align-items:center"><img src="${p.img}" style="width:55px;height:55px;object-fit:cover;border-radius:8px"><div style="flex:1"><b>${p.name}</b><br>$${p.price} <s>$${p.old}</s><br><button onclick="addToCart('${p.name} - $${p.price}',${p.price})" style="background:#111;color:#fff;border:none;padding:6px 10px;border-radius:50px;font-weight:700;cursor:pointer;font-size:11px;margin-top:4px">Add To Cart</button></div><button onclick="toggleWishlist(${p.id})" style="border:none;background:none;cursor:pointer;color:#D32F2F;font-weight:700">Remove ✕</button></div>`; ul.appendChild(li); }); }
+function toggleWishDrawer(openOnly){ let d=document.getElementById('wishDrawer'); if(openOnly){d.classList.add('open');return;} d.classList.toggle('open'); }
+function showWishlistOnly(){ wishlistOnly=true; currentCat='all'; document.querySelectorAll('#catBar button').forEach(b=>b.classList.remove('active')); filterProducts(); document.getElementById('shop').scrollIntoView({behavior:'smooth'}); if(!wishlist.length) alert('Your wishlist is empty. Tap ❤️ on any product to save it.'); }
+function addAllWishlistToCart(){ if(!wishlist.length){alert('Wishlist is empty');return;} wishlist.forEach(id=>{ let p=PRODUCTS.find(x=>x.id===id); if(p) addToCartSilent(p.name+' - $'+p.price,p.price); }); updateCart(); toggleWishDrawer(); toggleCart(true); }
+function sendWishlistToWhatsApp(){ if(!wishlist.length){ alert('Wishlist is empty'); return; } let user = currentUser ? currentUser.name+'\nPhone: '+currentUser.phone+'\nEmail: '+currentUser.email+'\nLocation: '+currentUser.county+' — '+currentUser.address : 'Guest Customer'; let txt='Hi XSSENCE - MY WISHLIST ❤️%0A'; wishlist.forEach((id,i)=>{ let p=PRODUCTS.find(x=>x.id===id); if(p) txt+=encodeURIComponent((i+1)+'. '+p.name+' - $'+p.price)+'%0A'; }); txt+='%0A'+encodeURIComponent(user)+'%0A%0APlease tell me if these are available?'; window.open('https://wa.me/231778566814?text='+txt,'_blank'); }
+function copyWishlistReminder(){ if(!wishlist.length){ alert('No wishlist items'); return; } let p=PRODUCTS.find(x=>x.id===wishlist[0]); let msg=`Hi 👋 This is XSSENCE Liberia ❤️\nYou saved ${p.name} - $${p.price} to your Wishlist but didn't order yet.\nStill want it? Stock is limited 🔥\nReply YES and I'll hold it for you.\nOrange Money: 0778 455 814`; navigator.clipboard.writeText(msg).then(()=>alert('✅ Reminder copied!\n\n'+msg)); }
+let currentCat='all';
+function setCat(cat,el){ wishlistOnly=false; currentCat=cat; document.querySelectorAll('#catBar button').forEach(b=>b.classList.remove('active')); el.classList.add('active'); filterProducts(); document.getElementById('shop').scrollIntoView({behavior:'smooth'}); }
+function clearFilters(){ wishlistOnly=false; document.getElementById('searchInput').value=''; document.getElementById('colorFilter').value=''; document.getElementById('priceFilter').value=''; document.getElementById('sizeFilter').value=''; currentCat='all'; document.querySelectorAll('#catBar button').forEach(b=>b.classList.remove('active')); document.querySelector('#catBar button').classList.add('active'); filterProducts(); }
+function filterProducts(){ let q=(document.getElementById('searchInput').value||'').toLowerCase(); let col=document.getElementById('colorFilter').value; let pr=document.getElementById('priceFilter').value; let sz=document.getElementById('sizeFilter').value; let f=PRODUCTS.filter(p=>{ if(wishlistOnly && !isWishlisted(p.id)) return false; if(currentCat!=='all'&&p.cat!==currentCat) return false; if(q&&!(p.name.toLowerCase().includes(q)||p.cat.toLowerCase().includes(q)||p.colors.toLowerCase().includes(q))) return false; if(col&&!p.colors.includes(col)) return false; if(pr){ let[a,b]=pr.split('-').map(Number); if(p.price<a||p.price>b) return false; } if(sz&&!p.sizes.includes(sz)) return false; return true; }); document.getElementById('resultCount').innerText=(wishlistOnly?'Wishlist: ':'')+f.length+' Items Found'; document.getElementById('noResult').style.display=f.length?'none':'block'; document.getElementById('productGrid').innerHTML=f.map(p=>`<div class="card"><button class="heart-btn ${isWishlisted(p.id)?'active':''}" onclick="toggleWishlist(${p.id},this);event.stopPropagation()">${isWishlisted(p.id)?'♥':'♡'}</button><div class="img" onclick="document.getElementById('${p.anchor}').scrollIntoView({behavior:'smooth'})"><img src="${p.img}"></div><div class="cat">${p.cat.replace('-',' ')}</div><h3>${p.name}</h3><div class="stars">★★★★★ 4.9</div><p class="price">$${p.price} <s>$${p.old}</s></p><div style="font-size:11px;color:#666">${p.colors}</div><button class="add-btn" onclick="addToCart('${p.name} - $${p.price}',${p.price})">Add to Cart</button><button class="view-btn" onclick="toggleWishlist(${p.id},this)">${isWishlisted(p.id)?'❤️ Saved to Wishlist':'♡ Add to Wishlist'}</button></div>`).join(''); updateWishlistUI(); }
+let galleries={
+hoodie:{imgs:['IMG-20261114-WA3069.jpg','IMG-20261114-WA0099.jpg','IMG-20261114-WA3163.jpg','IMG-20261114-WA6096.jpg','IMG-20261114-WA6907.jpg'],labels:['Black','Grey','Olive','Mocha','Cream'],idx:0},
+dodgers:{imgs:['IMG-20261115-WA9250.jpg','IMG-20261115-WA0026.jpg','IMG-20261115-WA0045.jpg','IMG-20261115-WA0050.jpg'],labels:['Studio Front','Jersey Detail','Back','Customer Photo'],idx:0},
+graffiti:{imgs:['IMG-20261115-WA1956.jpg','IMG-20261115-WA6008.jpg','IMG-20261115-WA0477.jpg','IMG-20261115-WA8593.jpg'],labels:['Front','Back','Collar Detail','Sleeve Detail'],idx:0},
+adidas:{imgs:['IMG-20261115-WA6989.jpg','IMG-20261115-WA2719.jpg','IMG-20261115-WA6174.jpg','IMG-20261115-WA9482.jpg'],labels:['Front','Back','Hood Detail','Sleeve Detail'],idx:0},
+polo:{imgs:['IMG-20261115-WA0886.jpg','IMG-20261115-WA2671.jpg','IMG-20261115-WA5553.jpg','IMG-20261115-WA8590.jpg'],labels:['Front','Back','Hood Detail','Sleeve Detail'],idx:0},
+tee:{imgs:['IMG-20261114-WA5211.jpg','IMG-20261114-WA3719.jpg','IMG-20261114-WA5542.jpg','IMG-20261114-WA8188.jpg','IMG-20261114-WA9099.jpg'],labels:['Black Front','Back Print','Logo Detail','Cream','White'],idx:0},
+joggers:{imgs:['IMG-20261114-WA5956.jpg','IMG-20261114-WA6723.jpg','IMG-20261114-WA2062.jpg','IMG-20261114-WA3669.jpg','IMG-20261114-WA5493.jpg'],labels:['Black Front','Black Back','Cream','Brown','Grey'],idx:0},
+longsleeve:{imgs:['IMG-20261115-WA1956.jpg','IMG-20261115-WA6008.jpg','IMG-20261115-WA0477.jpg','IMG-20261115-WA8593.jpg','IMG-20261115-WA6261.jpg'],labels:['Front','Back','Neck','Sleeve','Detail'],idx:0}
+};
+function updateSlider(product){ let g=galleries[product]; let imgMap={hoodie:'imgHoodie',dodgers:'imgDodgers',graffiti:'imgGraffiti',adidas:'imgAdidas',polo:'imgPolo',tee:'imgTee',joggers:'imgJoggers',longsleeve:'imgLongSleeve'}; let labelMap={hoodie:'hoodieLabel',dodgers:'dodgersLabel',graffiti:'graffitiLabel',adidas:'adidasLabel',polo:'poloLabel',tee:'teeLabel',joggers:'joggersLabel',longsleeve:'longsleeveLabel'}; let imgEl=document.getElementById(imgMap[product]); if(imgEl) imgEl.src='assets/photos/'+g.imgs[g.idx]; let lab=document.getElementById(labelMap[product]); if(lab) lab.innerText=(g.idx+1)+' / '+g.imgs.length+' — '+g.labels[g.idx]; let dots=document.getElementById('dots'+product.charAt(0).toUpperCase()+product.slice(1)); if(dots){ dots.querySelectorAll('span').forEach((d,i)=>{d.classList.toggle('active',i===g.idx)}); } let thumbs=document.getElementById('thumbs'+product.charAt(0).toUpperCase()+product.slice(1)); if(thumbs){ thumbs.querySelectorAll('div').forEach((d,i)=>{d.classList.toggle('active',i===g.idx)}); } }
+function renderProductGallery(product){
+  let gallery=galleries[product];
+  let crumb=document.getElementById(product);
+  let section=crumb&&crumb.nextElementSibling;
+  if(!section) return;
+  let dots=document.getElementById('dots'+product.charAt(0).toUpperCase()+product.slice(1));
+  let thumbs=section.querySelector('.thumbs');
+  if(dots) dots.innerHTML='';
+  if(thumbs) thumbs.innerHTML='';
+  gallery.imgs.forEach((file,index)=>{
+    let src='assets/photos/'+file;
+    if(dots){
+      let dot=document.createElement('span');
+      if(index===gallery.idx) dot.classList.add('active');
+      dot.onclick=()=>goSlide(product,index);
+      dots.appendChild(dot);
+    }
+    if(thumbs){
+      let thumb=document.createElement('div');
+      if(index===gallery.idx) thumb.classList.add('active');
+      let img=document.createElement('img');
+      img.src=src;
+      img.alt=gallery.labels[index];
+      let label=document.createElement('span');
+      label.innerText=gallery.labels[index];
+      thumb.appendChild(img);
+      thumb.appendChild(label);
+      thumb.onclick=()=>goSlide(product,index);
+      thumbs.appendChild(thumb);
+    }
+  });
+  updateSlider(product);
+}
+const PHOTO_GALLERY=[
+{src:'IMG-20261114-WA9377.jpg',category:'Hoodies',label:'Navy XSSENCE hoodie'},
+{file:'IMG-20261114-WA3069.jpg',category:'Hoodies',label:'Black XSSENCE hoodie'},
+{file:'IMG-20261114-WA0099.jpg',category:'Hoodies',label:'Grey XSSENCE hoodie'},
+{file:'IMG-20261114-WA3163.jpg',category:'Hoodies',label:'Olive XSSENCE hoodie'},
+{file:'IMG-20261114-WA6096.jpg',category:'Hoodies',label:'Mocha XSSENCE hoodie'},
+{file:'IMG-20261114-WA6907.jpg',category:'Hoodies',label:'Cream XSSENCE hoodie'},
+{file:'IMG-20261115-WA0886.jpg',category:'Hoodies',label:'Colour-splash Polo hoodie'},
+{file:'IMG-20261115-WA2671.jpg',category:'Hoodies',label:'Polo hoodie back'},
+{file:'IMG-20261115-WA5553.jpg',category:'Hoodies',label:'Polo hoodie hood detail'},
+{file:'IMG-20261115-WA8590.jpg',category:'Hoodies',label:'Polo hoodie sleeve detail'},
+{file:'IMG-20261115-WA6989.jpg',category:'Hoodies',label:'Blue three-stripe hoodie'},
+{file:'IMG-20261115-WA2719.jpg',category:'Hoodies',label:'Blue hoodie back'},
+{file:'IMG-20261115-WA6174.jpg',category:'Hoodies',label:'Blue hoodie hood detail'},
+{file:'IMG-20261115-WA9482.jpg',category:'Hoodies',label:'Blue hoodie sleeve detail'},
+{file:'IMG-20261115-WA0038.jpg',category:'Hoodies',label:'Polo hoodie — customer photo'},
+{file:'IMG-20261115-WA0051.jpg',category:'Hoodies',label:'Polo hoodie back — customer photo'},
+{file:'IMG-20261115-WA0042.jpg',category:'Hoodies',label:'Blue hoodie — customer photo'},
+{file:'IMG-20261115-WA0048.jpg',category:'Hoodies',label:'Blue hoodie detail — customer photo'},
+{file:'IMG-20261114-WA3719.jpg',category:'Tees',label:'Black XSSENCE tee back print'},
+{file:'IMG-20261114-WA3863.jpg',category:'Tees',label:'Olive XSSENCE tee'},
+{file:'IMG-20261114-WA5211.jpg',category:'Tees',label:'Black XSSENCE tee front'},
+{file:'IMG-20261114-WA5542.jpg',category:'Tees',label:'Black tee logo detail'},
+{file:'IMG-20261114-WA6310.jpg',category:'Tees',label:'Mocha XSSENCE tee'},
+{file:'IMG-20261114-WA8188.jpg',category:'Tees',label:'Cream XSSENCE tee'},
+{file:'IMG-20261114-WA8873.jpg',category:'Tees',label:'Navy XSSENCE tee'},
+{file:'IMG-20261114-WA9099.jpg',category:'Tees',label:'White XSSENCE tee'},
+{file:'IMG-20261114-WA1126.jpg',category:'Tees',label:'XSSENCE tee front'},
+{file:'IMG-20261114-WA2062.jpg',category:'Joggers',label:'Cream XSSENCE joggers'},
+{file:'IMG-20261114-WA6723.jpg',category:'Joggers',label:'Black joggers back'},
+{file:'IMG-20261114-WA3669.jpg',category:'Joggers',label:'Brown XSSENCE joggers'},
+{file:'IMG-20261114-WA5956.jpg',category:'Joggers',label:'Black XSSENCE joggers'},
+{file:'IMG-20261114-WA5493.jpg',category:'Joggers',label:'Grey XSSENCE joggers'},
+{file:'IMG-20261114-WA7056.jpg',category:'Joggers',label:'Navy XSSENCE joggers'},
+{file:'IMG-20261114-WA9681.jpg',category:'Joggers',label:'Olive XSSENCE joggers'},
+{file:'IMG-20261114-WA9967.jpg',category:'Joggers',label:'Black joggers detail'},
+{file:'IMG-20261115-WA9250.jpg',category:'Jerseys',label:'Dodgers Freeman #5 jersey'},
+{file:'IMG-20261115-WA0026.jpg',category:'Jerseys',label:'Dodgers jersey front detail — customer photo'},
+{file:'IMG-20261115-WA0027.jpg',category:'Jerseys',label:'Dodgers jersey detail — customer photo'},
+{file:'IMG-20261115-WA0044.jpg',category:'Jerseys',label:'Dodgers jersey sleeve — customer photo'},
+{file:'IMG-20261115-WA0045.jpg',category:'Jerseys',label:'Freeman #5 jersey back — customer photo'},
+{file:'IMG-20261115-WA0047.jpg',category:'Jerseys',label:'Dodgers jersey front — customer photo'},
+{file:'IMG-20261115-WA0050.jpg',category:'Jerseys',label:'Dodgers jersey — customer photo'},
+{file:'IMG-20261115-WA0477.jpg',category:'Crewnecks',label:'Brown graffiti collar detail'},
+{file:'IMG-20261115-WA1956.jpg',category:'Crewnecks',label:'Brown graffiti crewneck front'},
+{file:'IMG-20261115-WA6008.jpg',category:'Crewnecks',label:'Brown graffiti crewneck back'},
+{file:'IMG-20261115-WA6261.jpg',category:'Crewnecks',label:'Brown graffiti crewneck back detail'},
+{file:'IMG-20261115-WA8593.jpg',category:'Crewnecks',label:'Brown graffiti sleeve detail'},
+{file:'IMG-20261115-WA0040.jpg',category:'Crewnecks',label:'Brown graphic crewneck back — customer photo'},
+{file:'IMG-20261115-WA0041.jpg',category:'Crewnecks',label:'Brown graphic crewneck front — customer photo'},
+{file:'IMG-20261115-WA0043.jpg',category:'Crewnecks',label:'Brown graphic crewneck detail — customer photo'},
+{file:'IMG-20261115-WA0046.jpg',category:'Crewnecks',label:'Brown crewneck collar — customer photo'},
+{file:'IMG-20261115-WA0049.jpg',category:'Crewnecks',label:'Brown crewneck graphic — customer photo'}
+];
+function renderPhotoGallery(category,button){
+  let grid=document.getElementById('photoGalleryGrid');
+  let filters=document.getElementById('photoGalleryFilters');
+  if(!grid||!filters) return;
+  filters.querySelectorAll('button').forEach((item,index)=>item.classList.toggle('active',button?item===button:index===0));
+  grid.innerHTML='';
+  PHOTO_GALLERY.filter(photo=>category==='all'||photo.category===category).forEach(photo=>{
+    let figure=document.createElement('figure');
+    let img=document.createElement('img');
+    img.src=photo.src||'assets/photos/'+photo.file;
+    img.alt=photo.label;
+    img.loading='lazy';
+    img.decoding='async';
+    let caption=document.createElement('figcaption');
+    caption.innerText=photo.label;
+    figure.appendChild(img);
+    figure.appendChild(caption);
+    grid.appendChild(figure);
+  });
+}
+function slideProduct(product,dir){ let g=galleries[product]; g.idx+=dir; if(g.idx<0) g.idx=g.imgs.length-1; if(g.idx>=g.imgs.length) g.idx=0; updateSlider(product); }
+function goSlide(product,i){ galleries[product].idx=i; updateSlider(product); }
+let touchX=0;
+[['sliderHoodie','hoodie'],['sliderDodgers','dodgers'],['sliderGraffiti','graffiti'],['sliderAdidas','adidas'],['sliderPolo','polo'],['sliderTee','tee'],['sliderJoggers','joggers'],['sliderLongsleeve','longsleeve']].forEach(([id,prod])=>{ let el=document.getElementById(id); if(!el) return; el.addEventListener('touchstart',e=>{touchX=e.touches[0].clientX},{passive:true}); el.addEventListener('touchend',e=>{ let dx=e.changedTouches[0].clientX-touchX; if(dx<-40) slideProduct(prod,1); if(dx>40) slideProduct(prod,-1); },{passive:true}); });
+let cart=[]; let total=0;
+function parsePrice(s){ return parseInt(s.replace(/[^0-9]/g,''))||0; }
+function changeQty(id,d){ let q=document.getElementById(id); let v=parseInt(q.value)+d; if(v<1) v=1; q.value=v; }
+function selectBundle(el,priceId){ let parent=el.parentElement; parent.querySelectorAll('.bundle').forEach(b=>b.classList.remove('selected')); el.classList.add('selected'); let price=el.querySelector('.bprice').firstChild.textContent.trim(); document.getElementById(priceId).innerText=price; }
+function addCartItem(name,price,render=true){
+  let ex=cart.find(i=>i.name===name);
+  if(ex){ex.qty++;} else {cart.push({name:name,price:price,qty:1});}
+  if(render){updateCart();toggleCart(true);}
+}
+function addToCartSilent(name,price){ addCartItem(name,price,false); }
+function addToCart(name,price){ addCartItem(name,price); }
+function addPair(name,price){ addCartItem(name+' - $'+price,price); }
+function addBundleToCart(name,priceId){ let priceText=document.getElementById(priceId).innerText; addCartItem(name+' - '+priceText,parsePrice(priceText)); }
+function updateCart(){ document.getElementById('cartCount').innerText=cart.reduce((a,b)=>a+b.qty,0); let ul=document.getElementById('cartItems'); ul.innerHTML=''; total=0; cart.forEach((item,i)=>{ total+=item.price*item.qty; let li=document.createElement('li'); li.innerHTML=`<div class="cart-row"><span><b>${item.name}</b><br>$${item.price} each</span><span><b>$${item.price*item.qty}</b></span></div><div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px"><span class="cart-qty"><button onclick="changeCartQty(${i},-1)">-</button><span>${item.qty}</span><button onclick="changeCartQty(${i},1)">+</button></span><button class="remove-btn" onclick="removeItem(${i})">Remove ✕</button></div>`; ul.appendChild(li); }); document.getElementById('emptyMsg').style.display=cart.length?'none':'block'; document.getElementById('cartTotal').innerText='$'+total; updateCheckoutButtons(); }
+function changeCartQty(i,d){ cart[i].qty+=d; if(cart[i].qty<1){ cart.splice(i,1); } updateCart(); }
+function removeItem(i){ cart.splice(i,1); updateCart(); }
+function toggleCart(openOnly){ let d=document.getElementById('cartDrawer'); if(openOnly){d.classList.add('open');return;} d.classList.toggle('open'); }
+let pairMode=2;
+function setPairMode(m){ pairMode=m; document.getElementById('pair3Box').style.display=m===3?'block':'none'; document.getElementById('mode2Btn').style.background=m===2?'#111':'#fff'; document.getElementById('mode2Btn').style.color=m===2?'#fff':'#111'; document.getElementById('mode3Btn').style.background=m===3?'#111':'#fff'; document.getElementById('mode3Btn').style.color=m===3?'#fff':'#111'; calcPair(); }
+function applySameColor(){ let checked=document.getElementById('sameColorCheck').checked; document.getElementById('sameColorLabel').innerText=checked?'ON — all same colour':'Off — mix colours'; if(checked){ let c=document.getElementById('pair1Color').value; document.getElementById('pair2Color').value=c; if(pairMode===3) document.getElementById('pair3Color').value=c; } calcPair(); }
+function onColorChange(which){ if(document.getElementById('sameColorCheck').checked){ let c=document.getElementById('pair'+which+'Color').value; document.getElementById('pair1Color').value=c; document.getElementById('pair2Color').value=c; if(pairMode===3) document.getElementById('pair3Color').value=c; } calcPair(); }
+function calcPair(){ let s1=document.getElementById('pair1Item'); let s2=document.getElementById('pair2Item'); let p1=parseInt(s1.value),p2=parseInt(s2.value); let n1=s1.options[s1.selectedIndex].getAttribute('data-name'); let n2=s2.options[s2.selectedIndex].getAttribute('data-name'); let c1=document.getElementById('pair1Color').value; let c2=document.getElementById('pair2Color').value; let sz1=document.getElementById('pair1Size').value; let sz2=document.getElementById('pair2Size').value; let normal=p1+p2,pct=10,summary=n1+' ('+c1+' / '+sz1+') + '+n2+' ('+c2+' / '+sz2+')'; if(pairMode===3){ let s3=document.getElementById('pair3Item'); let p3=parseInt(s3.value); let n3=s3.options[s3.selectedIndex].getAttribute('data-name'); let c3=document.getElementById('pair3Color').value; let sz3=document.getElementById('pair3Size').value; normal+=p3; pct=15; summary+=' + '+n3+' ('+c3+' / '+sz3+')'; } let discount=Math.round(normal*pct/100); let totalPrice=normal-discount; document.getElementById('pairNormal').innerText='$'+normal; document.getElementById('pairSave').innerText='$'+discount+' ('+pct+'%)'; document.getElementById('pairTotal').innerText='$'+totalPrice; document.getElementById('pairBtnPrice').innerText='$'+totalPrice; document.getElementById('pairBtnPrice2').innerText='$'+totalPrice; document.getElementById('pairSummary').innerText=summary; return{summary,total:totalPrice}; }
+function addCustomPair(){ let d=calcPair(); let label=pairMode===3?'Custom Set of 3: ':'Custom Pair: '; addCartItem(label+d.summary+' - $'+d.total,d.total); }
+let otpVerified=false; let verifiedPhone=""; let otpCountdown=60; let otpInterval=null;
+function updateCheckoutButtons(){ let btn=document.getElementById('checkoutBtn'); let wa=document.getElementById('checkoutWaBtn'); if(otpVerified){ btn.disabled=false; wa.disabled=false; btn.innerText='Place Order — $'+total; wa.innerText='💬 Send Order To WhatsApp'; document.getElementById('otpNotVerified').style.display='none'; } else { btn.disabled=true; wa.disabled=true; btn.innerText='🔒 Verify OTP First — Place Order'; wa.innerText='🔒 Verify OTP First — Send To WhatsApp'; document.getElementById('otpNotVerified').style.display='block'; } }
+async function sendOTP(){
+  const phone=document.getElementById('otpPhone').value.trim()||document.getElementById('custPhone').value.trim();
+  if(!phone||phone.replace(/\D/g,'').length<9){ alert('Please enter a valid phone number first'); return; }
+  const response=await API.sendOTP(phone);
+  if(!response){ alert('The phone verification service is unavailable. Please try again later.'); return; }
+  document.getElementById('custPhone').value=phone;
+  document.getElementById('otpPhone').value=phone;
+  otpVerified=false;
+  verifiedPhone='';
+  updateCheckoutButtons();
+  document.getElementById('otpBox').style.display='block';
+  document.getElementById('otpMsg').innerHTML='Code sent to '+escapeHTML(phone)+' • Resend in <span id="otpTimer">60</span>s';
+  otpCountdown=60;
+  clearInterval(otpInterval);
+  document.getElementById('sendOtpBtn').innerText='Resend OTP';
+  document.getElementById('sendOtpBtn').disabled=true;
+  document.getElementById('sendOtpBtn').style.opacity='0.5';
+  otpInterval=setInterval(()=>{
+    otpCountdown--;
+    const timer=document.getElementById('otpTimer');
+    if(timer) timer.innerText=otpCountdown;
+    if(otpCountdown<=0){
+      clearInterval(otpInterval);
+      document.getElementById('sendOtpBtn').disabled=false;
+      document.getElementById('sendOtpBtn').style.opacity='1';
+      document.getElementById('sendOtpBtn').innerText='Resend OTP';
+    }
+  },1000);
+}
+async function verifyOTP(){
+  const code=document.getElementById('otpCode').value.trim();
+  const phone=document.getElementById('otpPhone').value.trim()||document.getElementById('custPhone').value.trim();
+  if(!/^\d{6}$/.test(code)){ alert('Enter the 6-digit code sent to your phone.'); return; }
+  const response=await API.verifyOTP(phone,code);
+  if(!response||!response.verified){ alert('Phone verification failed. Check the code or try again later.'); return; }
+  otpVerified=true;
+  verifiedPhone=phone;
+  document.getElementById('otpVerified').style.display='block';
+  document.getElementById('otpBox').style.display='none';
+  updateCheckoutButtons();
+  alert('✅ Phone Verified!');
+}
+function getOrderText(){ let n=document.getElementById('custName').value; let e=document.getElementById('custEmail').value; let p=document.getElementById('custPhone').value; let c=document.getElementById('custCounty').value; let a=document.getElementById('custAddress').value; let pay=document.getElementById('payMethod').value; let txt='Hi XSSENCE - NEW ORDER%0A'; cart.forEach(it=>{ txt+=encodeURIComponent(it.name+' x'+it.qty+' = $'+(it.price*it.qty))+'%0A'; }); txt+='%0AName: '+encodeURIComponent(n)+'%0AEmail: '+encodeURIComponent(e)+'%0APhone: '+encodeURIComponent(p)+'%0A✅ OTP Verified: '+encodeURIComponent(verifiedPhone)+'%0A✅ Logged In: '+encodeURIComponent(currentUser? currentUser.name+' ('+currentUser.email+')' : 'Guest')+'%0ADelivery: '+encodeURIComponent(c)+'%0AAddress: '+encodeURIComponent(a)+'%0APayment: '+encodeURIComponent(pay)+'%0ATotal Items: $'+total; return txt; }
+async function prepareCheckout(includePayment=false){
+  if(cart.length===0){alert('Cart is empty!');return null;}
+  if(!otpVerified){alert('Please verify OTP first.');return null;}
+  let name=document.getElementById('custName').value;
+  let phone=document.getElementById('custPhone').value;
+  let address=document.getElementById('custAddress').value;
+  if(!name||!phone||!address){alert('Please fill Name, Phone & Address');return null;}
+  let order={
+    items:cart,
+    total,
+    name,
+    phone,
+    email:document.getElementById('custEmail').value,
+    county:document.getElementById('custCounty').value,
+    address
+  };
+  if(includePayment){order.payment=document.getElementById('payMethod').value;}
+  await API.createOrder(order);
+  userOrders.push({
+    total,
+    items:cart.map(item=>item.name+' x'+item.qty).join(', '),
+    date:new Date().toLocaleDateString()
+  });
+  localStorage.setItem('xssence_orders',JSON.stringify(userOrders));
+  return name;
+}
+async function checkoutWhatsApp(){
+  if(!await prepareCheckout(true)) return;
+  window.open('https://wa.me/231778566814?text='+getOrderText(),'_blank');
+}
+async function checkout(){
+  let name=await prepareCheckout();
+  if(!name) return;
+  alert('Order Received! ✅\n\n'+name+'\nPhone Verified: '+verifiedPhone+'\nTotal: $'+total+'\nPay Orange Money to 0778 455 814');
+  cart=[];
+  updateCart();
+  otpVerified=false;
+  verifiedPhone='';
+  document.getElementById('otpVerified').style.display='none';
+  updateCheckoutButtons();
+  updateAuthUI();
+  toggleCart();
+}
+// Check backend health on load
+API.health().then(h=>{ document.getElementById('apiStatus').innerText = h ? 'Backend: ✅ Connected ('+h.message+')' : 'Backend: ⚠️ Offline - Orders may not sync'; document.getElementById('apiStatus').style.color = h ? '#2E7D32' : '#D32F2F'; });
+async function initializeSupabaseAuth(){
+  const status=document.getElementById('supabaseStatus');
+  if(!supabaseClient){
+    status.innerText='Supabase Auth: SDK unavailable';
+    status.style.color='#D32F2F';
+    updateAuthUI();
+    return;
+  }
+  try{
+    const {data,error}=await supabaseClient.auth.getSession();
+    if(error) throw error;
+    setAuthenticatedUser(data.session?data.session.user:null);
+    supabaseClient.auth.onAuthStateChange((_event,session)=>setAuthenticatedUser(session?session.user:null));
+    status.innerText='Supabase Auth: ✅ Connected';
+    status.style.color='#2E7D32';
+  }catch(error){
+    console.error('Supabase session initialization failed:',error);
+    status.innerText='Supabase Auth: ⚠️ Unable to connect';
+    status.style.color='#D32F2F';
+    updateAuthUI();
+  }
+}
+['hoodie','dodgers','graffiti','adidas','polo','tee','joggers','longsleeve'].forEach(renderProductGallery);
+renderPhotoGallery('all');
+filterProducts(); calcPair(); updateCheckoutButtons(); updateWishlistUI(); initializeSupabaseAuth();
+</script>
+</body>
+</html>
