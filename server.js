@@ -20,10 +20,33 @@ app.use(express.json());
 app.use(express.static(__dirname));
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 
-// ===== DATA STORAGE - JSON FILES (No DB needed) =====
-const DATA_DIR = path.join(__dirname, 'data');
-if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
+// ===== DATA STORAGE - POSTGRES (users survive deploys) =====
+const { Pool } = require('pg');
+const pool = process.env.DATABASE_URL ? new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } }) : null;
 
+let usersCache = [];
+async function initDB(){
+  if(!pool){ console.log('No DATABASE_URL - using memory only'); return; }
+  try{
+    await pool.query(`CREATE TABLE IF NOT EXISTS users (id TEXT PRIMARY KEY, data JSONB NOT NULL)`);
+    const r = await pool.query('SELECT data FROM users');
+    usersCache = r.rows.map(row => row.data);
+    console.log('Loaded users from Postgres:', usersCache.length);
+  }catch(e){ console.log('DB init failed:', e.message); }
+}
+initDB();
+
+function getUsers(){ return usersCache; }
+
+async function saveUsers(users){
+  usersCache = users;
+  if(!pool) return;
+  try{
+    for(const u of users){
+      await pool.query('INSERT INTO users(id, data) VALUES($1,$2) ON CONFLICT(id) DO UPDATE SET data=$2', [String(u.id), JSON.stringify(u)]);
+    }
+  }catch(e){ console.log('saveUsers DB failed:', e.message); }
+}
 function readJSON(file, fallback) {
   const p = path.join(DATA_DIR, file);
   if (!fs.existsSync(p)) { fs.writeFileSync(p, JSON.stringify(fallback, null, 2)); return fallback; }
@@ -103,7 +126,7 @@ app.post('/api/auth/signup', async (req, res) => {
     password: hashed, county: county || 'Monrovia', address: address.trim(), landmark: landmark || '',
     lat: lat || null, lng: lng || null, createdAt: new Date().toISOString()
   };
-  users.push(newUser); saveUsers(users);
+  users.push(newUser); await saveUsers(users);
   const token = signToken(newUser);
   res.json({ success: true, token, user: publicUser(newUser) });
 });
