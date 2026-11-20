@@ -55,8 +55,6 @@ function readJSON(file, fallback) {
 function writeJSON(file, data) {
   fs.writeFileSync(path.join(DATA_DIR, file), JSON.stringify(data, null, 2));
 }
-const getUsers = () => readJSON('users.json', []);
-const saveUsers = (u) => writeJSON('users.json', u);
 const getOrders = () => readJSON('orders.json', []);
 const saveOrders = (o) => writeJSON('orders.json', o);
 const getWishlists = () => readJSON('wishlists.json', {});
