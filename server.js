@@ -131,35 +131,34 @@ app.post('/api/auth/logout', (req, res) => {
 app.get('/api/auth/me', authMiddleware, (req, res) => {
   res.json({ user: publicUser(req.user) });
 });
-
-// ===== OTP - SEND =====
-// POST /api/auth/send-otp { phone } -> returns code in TEST MODE. In production, send via Twilio/WhatsApp and DON'T return code.
-app.post('/api/auth/send-otp', (req, res) => {
-  const { phone } = req.body;
-  if (!phone) return res.status(400).json({ error: 'Phone required' });
-  const code = OTP_TEST_CODE; // TODO: Replace with real SMS: Math.floor(100000 + Math.random()*900000).toString()
-  otpStore[phone] = { code, expiresAt: Date.now() + 5 * 60 * 1000 };
-  console.log(`[OTP] Phone: ${phone} Code: ${code} - Send via WhatsApp/SMS in production`);
-  // TODO PRODUCTION: Call Twilio / WhatsApp API here
-  // Example: await twilioClient.messages.create({ to: '+231'+phone, from: 'XSSENCE', body: `Your XSSENCE code is ${code}` })
-  res.json({ success: true, message: 'OTP sent to ' + phone, code }); // Remove `code` in production!
+// ---- EMAIL OTP (Replaces SMS for now) ---
+let otps = {};
+app.post('/api/auth/send-otp', async (req,res)=>{
+  const email = (req.body.email || '').toString().trim().toLowerCase();
+  const phone = (req.body.phone || '').toString().trim();
+  if(!email || !email.includes('@')) return res.status(400).json({error:'Please enter a valid email first'});
+  const code = Math.floor(100000 + Math.random()*900000).toString();
+  otps[email] = { code, expires: Date.now() + 10*60*1000 };
+  if(phone) otps[phone] = { code, expires: Date.now() + 10*60*1000 };
+  console.log(`OTP for ${email} / ${phone}: ${code}`);
+  try{
+    await sendEmail(email, `Your XSSENCE Code is ${code}`, `<h1>${code}</h1><p>Enter this code on the website.</p>`);
+    res.json({success:true, message:'Code sent to your email'});
+  }catch(e){ res.status(500).json({error:'Could not send email. Try again.'}); }
+});
+app.post('/api/auth/verify-otp', (req,res)=>{
+  const email = (req.body.email || '').toString().trim().toLowerCase();
+  const phone = (req.body.phone || '').toString().trim();
+  const code = (req.body.code || '').toString().trim();
+  const stored = otps[email] || otps[phone];
+  if(!stored) return res.status(400).json({error:'No code sent. Click Send OTP first.'});
+  if(Date.now() > stored.expires) return res.status(400).json({error:'Code expired. Click Resend.'});
+  if(stored.code !== code) return res.status(400).json({error:'Wrong code. Check your email.'});
+  delete otps[email]; if(phone) delete otps[phone];
+  res.json({verified:true});
 });
 
-// ===== OTP - VERIFY =====
-// POST /api/auth/verify-otp { phone, code }
-app.post('/api/auth/verify-otp', (req, res) => {
-  const { phone, code } = req.body;
-  const entry = otpStore[phone];
-  if (!entry) {
-    // Allow test code even if not sent, for demo
-    if (code === OTP_TEST_CODE) return res.json({ success: true, verified: true, message: 'Phone verified (test mode)' });
-    return res.status(400).json({ error: 'No OTP sent. Please tap Send OTP first.' });
-  }
-  if (Date.now() > entry.expiresAt) return res.status(400).json({ error: 'OTP expired. Please resend.' });
-  if (code !== entry.code) return res.status(400).json({ error: 'Wrong code' });
-  delete otpStore[phone];
-  res.json({ success: true, verified: true, message: 'Phone verified' });
-});
+
 
 // ===== LOCATION - SAVE =====
 // POST /api/location/save { county, address, email, phone, lat, lng } - Auth required
